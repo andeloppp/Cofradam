@@ -267,6 +267,32 @@
       color: rgba(150,232,180,0.8); line-height: 2;
     }
 
+    /* ── HISTORIAL (⬇️ NUEVO ESTILO) ── */
+    .historial-item {
+      border: 1px solid rgba(201,168,76,0.08);
+      border-radius: 4px; padding: 20px;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.015);
+      display: flex; align-items: center;
+      transition: all 0.2s;
+    }
+    .historial-item:hover { border-color: rgba(201,168,76,0.25); background: rgba(201,168,76,0.03); }
+    .btn-corazon {
+      cursor: pointer; font-size: 24px; margin-right: 18px;
+      color: rgba(232,213,176,0.3); transition: color 0.2s;
+      user-select: none;
+    }
+    .btn-corazon.fav { color: var(--rojo); }
+    .historial-n { font-family: 'Cinzel', serif; font-size: 18px; color: var(--oro); margin-bottom: 4px; }
+    .historial-f { font-size: 13px; color: rgba(232,213,176,0.4); font-family: 'Cinzel', serif; letter-spacing: 1px;}
+    .btn-borrar-historial {
+      margin-top: 20px; width: 100%; padding: 13px; background: rgba(139,26,26,0.1);
+      border: 1px solid rgba(139,26,26,0.4); color: rgba(232,150,150,0.8);
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px;
+      cursor: pointer; border-radius: 3px; transition: all 0.2s;
+    }
+    .btn-borrar-historial:hover { background: rgba(139,26,26,0.25); border-color: rgba(139,26,26,0.6); }
+
     /* ── FOOTER ── */
     footer {
       text-align: center; padding: 20px;
@@ -297,6 +323,7 @@
   <button class="active" onclick="cambiarTab('identificar', this)">🎺 IDENTIFICAR</button>
   <button onclick="cambiarTab('catalogo', this)">📜 CATÁLOGO</button>
   <button onclick="cambiarTab('aportar', this)">✚ APORTAR</button>
+  <button onclick="cambiarTab('historial', this)">📖 HISTORIAL</button>
 </nav>
 
 <main>
@@ -351,6 +378,14 @@
         <button class="btn-enviar" id="btn-enviar" onclick="enviarAporte()">✚ AÑADIR AL CATÁLOGO COMPARTIDO</button>
       </div>
     </div>
+  </div>
+
+  <div class="tab-panel" id="tab-historial">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <h2 style="font-family: 'Cinzel', serif; font-size: 22px; color: var(--oro); letter-spacing: 2px;">Tu Libreta de Marchas</h2>
+      <p style="color: rgba(232,213,176,0.5); font-size: 16px; margin-top: 8px;">Aquí se guardan automáticamente las marchas que vas identificando.</p>
+    </div>
+    <div id="lista-historial"></div>
   </div>
 
 </main>
@@ -477,6 +512,9 @@ function mostrarResultado(data) {
     const enCatalogo = todasLasMarchas().find(
       x => x.nombre.toLowerCase().includes(nombre.toLowerCase()) || nombre.toLowerCase().includes(x.nombre.toLowerCase())
     );
+
+    // ⬇️ NUEVO: GATILLO DEL HISTORIAL
+    guardarEnHistorial(nombre);
 
     wrap.innerHTML = `
       <div class="resultado-card">
@@ -704,12 +742,82 @@ function cambiarTab(id, btn) {
   document.getElementById('tab-' + id).classList.add('active');
   btn.classList.add('active');
   if (id === 'catalogo') renderCatalogo();
+  if (id === 'historial') mostrarHistorial(); // ⬇️ NUEVO
+}
+
+// ═══════════════════════════════════════════════
+// HISTORIAL (⬇️ NUEVAS FUNCIONES)
+// ═══════════════════════════════════════════════
+function guardarEnHistorial(nombreMarcha) {
+  let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
+  
+  const ahora = new Date();
+  const fechaBonita = ahora.toLocaleDateString() + ' - ' + ahora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+  // Si la última marcha que identificó es exactamente esta, no la duplicamos
+  if(historial.length > 0 && historial[0].nombre === nombreMarcha) return;
+
+  const nuevaMarcha = {
+    nombre: nombreMarcha,
+    fecha: fechaBonita,
+    favorito: false
+  };
+
+  historial.unshift(nuevaMarcha);
+  localStorage.setItem('misMarchas', JSON.stringify(historial));
+  mostrarHistorial();
+}
+
+function mostrarHistorial() {
+  const lista = document.getElementById('lista-historial');
+  if (!lista) return;
+
+  let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
+  lista.innerHTML = ''; 
+
+  if (historial.length === 0) {
+    lista.innerHTML = '<p style="text-align:center;padding:40px;color:rgba(232,213,176,0.25);font-style:italic">Aún no has cazado ninguna marcha.</p>';
+    return;
+  }
+
+  let html = '';
+  historial.forEach((marcha, index) => {
+    const corazon = marcha.favorito ? '❤️' : '🤍';
+    const claseFav = marcha.favorito ? 'fav' : '';
+    html += `
+      <div class="historial-item">
+        <span class="btn-corazon ${claseFav}" onclick="marcarFavorito(${index})">${corazon}</span>
+        <div>
+          <div class="historial-n">${marcha.nombre}</div>
+          <div class="historial-f">${marcha.fecha}</div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += `<button class="btn-borrar-historial" onclick="borrarHistorial()">🗑️ VACIAR LIBRETA</button>`;
+  lista.innerHTML = html;
+}
+
+function marcarFavorito(index) {
+  let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
+  historial[index].favorito = !historial[index].favorito; 
+  localStorage.setItem('misMarchas', JSON.stringify(historial));
+  mostrarHistorial(); 
+}
+
+function borrarHistorial() {
+  if(confirm('¿Seguro que quieres borrar todas tus marchas identificadas?')) {
+    localStorage.removeItem('misMarchas');
+    mostrarHistorial();
+  }
 }
 
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
 renderCatalogo();
+mostrarHistorial(); // ⬇️ NUEVO
 </script>
 </body>
 </html>
