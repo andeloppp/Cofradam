@@ -240,6 +240,8 @@
 <footer>
   <p><span class="adornos">~</span> COFRADAM <span class="adornos">~</span></p>
   <p style="margin-top: 8px; opacity: 0.6; font-size: 10px;">Creado para preservar los sonidos de nuestra Semana Santa</p>
+  
+  <button id="btn-instalar" style="display: none; margin: 20px auto 0; padding: 12px 24px; background: var(--oro); color: #080507; border: none; border-radius: 25px; font-family: 'Cinzel', serif; font-size: 14px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(201,168,76,0.3); transition: transform 0.2s;"><i class="fa-solid fa-download" style="margin-right: 8px;"></i> INSTALAR APP</button>
 </footer>
 
 <script>
@@ -596,6 +598,44 @@ function setEstado(s) {
     else if(s==='procesando'){ b.innerHTML='<span class="spinner"></span>'; l.innerText='BUSCANDO EN EL ARCHIVO...'; }
     else { b.classList.remove('grabando'); b.innerHTML='<i class="fa-solid fa-microphone"></i>'; l.innerText='TOCA PARA IDENTIFICAR'; }
 }
+// ═══════════════════════════════════════════════
+// INSTALACIÓN PWA (BOTÓN MÁGICO)
+// ═══════════════════════════════════════════════
+let eventoInstalacion = null;
+const btnInstalar = document.getElementById('btn-instalar');
+
+// El navegador avisa de que la app se puede instalar
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Evitamos que salga la mini-barra automática de Chrome
+    e.preventDefault();
+    // Guardamos el evento para usarlo luego
+    eventoInstalacion = e;
+    // ¡Hacemos visible nuestro botón dorado!
+    btnInstalar.style.display = 'block';
+});
+
+// Qué pasa cuando el usuario toca nuestro botón
+btnInstalar.addEventListener('click', async () => {
+    if (!eventoInstalacion) return;
+    
+    // Mostramos la ventana nativa del móvil para instalar
+    eventoInstalacion.prompt();
+    
+    // Esperamos a ver si le da a "Aceptar" o "Cancelar"
+    const { outcome } = await eventoInstalacion.userChoice;
+    if (outcome === 'accepted') {
+        console.log('¡App instalada!');
+        btnInstalar.style.display = 'none'; // Lo ocultamos porque ya está instalada
+    }
+    
+    // Limpiamos la variable
+    eventoInstalacion = null;
+});
+
+// Por si la instala desde el menú del navegador sin usar nuestro botón
+window.addEventListener('appinstalled', () => {
+    btnInstalar.style.display = 'none';
+});
 
 // Inicio
 renderLista('lista-historial', false);
