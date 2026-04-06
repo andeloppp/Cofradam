@@ -278,9 +278,42 @@ localforage.config({ name: 'ShazamCofrade', storeName: 'audios' });
 async function toggleGrabacion() {
     if (grabando) return; 
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
+        // 1. Pedimos permiso al micro (esta línea ya la deberías tener, o una muy parecida)
+const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+// ═══════════════════════════════════════════════
+// INICIO DEL FILTRO DE AUDIO (ESTUDIO VIRTUAL)
+// ═══════════════════════════════════════════════
+
+// Aseguramos compatibilidad con todos los navegadores móviles
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const source = audioContext.createMediaStreamSource(stream);
+
+// Filtro 1: Cortar graves (Bombos, racheo, viento fuerte)
+const filtroGraves = audioContext.createBiquadFilter();
+filtroGraves.type = 'highpass';
+filtroGraves.frequency.value = 300; 
+
+// Filtro 2: Cortar agudos (Silbidos, voces chillonas, ruido blanco)
+const filtroAgudos = audioContext.createBiquadFilter();
+filtroAgudos.type = 'lowpass';
+filtroAgudos.frequency.value = 3000; 
+
+// Destino final del audio ya limpio
+const destinoLimpio = audioContext.createMediaStreamDestination();
+
+// Conectamos los cables virtuales en cadena
+source.connect(filtroGraves);
+filtroGraves.connect(filtroAgudos);
+filtroAgudos.connect(destinoLimpio);
+
+// ═══════════════════════════════════════════════
+// FIN DEL FILTRO DE AUDIO
+// ═══════════════════════════════════════════════
+
+// CAMBIO IMPORTANTE: Ahora la grabadora usa 'destinoLimpio.stream' en vez del 'stream' original
+mediaRecorder = new MediaRecorder(destinoLimpio.stream);
+
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.onstop = () => procesarAudio();
         
@@ -290,12 +323,20 @@ async function toggleGrabacion() {
         iniciarVisualizador(stream); // <- INICIAMOS EL DIBUJO DE ONDAS AQUI
         
         setTimeout(() => {
-            if(mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                stream.getTracks().forEach(t => t.stop());
-                detenerVisualizador(); // <- PARAMOS EL DIBUJO AQUÍ
-            }
-        }, 12000); 
+    // 1. Paramos el grabador
+    mediaRecorder.stop();
+    
+    // 2. Apagamos el micrófono usando el stream ORIGINAL (¡Muy importante!)
+    stream.getTracks().forEach(track => track.stop());
+    
+    // 3. ¡NUEVO! Apagamos el filtro para liberar memoria del móvil
+    if (audioContext && audioContext.state !== 'closed') {
+        audioContext.close();
+    }
+    
+    // Y aquí ya seguiría tu código normal de parar el visualizador, etc.
+    // ...
+}, 12000); // Tus 12 segundos de grabación
     } catch(err) {
         alert("Error: Activa el permiso de micrófono.");
     }
