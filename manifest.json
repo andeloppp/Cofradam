@@ -1,0 +1,21 @@
+{
+  "name": "Cofradam",
+  "short_name": "Cofradam",
+  "description": "La libreta sonora del cofrade",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#080507",
+  "theme_color": "#0d090b",
+  "icons": [
+    {
+      "src": "icono-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
