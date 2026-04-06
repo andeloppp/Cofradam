@@ -509,34 +509,44 @@ function mostrarResultado(data) {
     const nombre = m.title || 'Desconocido';
     const artista = m.artists?.map(a=>a.name).join(', ') || m.album?.name || '';
     const score = m.score || '';
-    const enCatalogo = todasLasMarchas().find(
-      x => x.nombre.toLowerCase().includes(nombre.toLowerCase()) || nombre.toLowerCase().includes(x.nombre.toLowerCase())
-    );
 
-    // ⬇️ NUEVO: GATILLO DEL HISTORIAL
+    // Guardamos en la libreta (Historial)
     guardarEnHistorial(nombre);
+
+    // ⬇️ MAGIA: Creamos los enlaces dinámicos para YouTube y WhatsApp ⬇️
+    const textoBusqueda = nombre + " marcha semana santa";
+    const urlYoutube = "https://www.youtube.com/results?search_query=" + encodeURIComponent(textoBusqueda);
+    
+    const textoWhatsApp = "🎺 Acabo de escuchar la marcha *" + nombre + "* en la calle. ¡Cazada con mi Shazam Cofrade! 📱";
+    const urlWhatsApp = "https://api.whatsapp.com/send?text=" + encodeURIComponent(textoWhatsApp);
 
     wrap.innerHTML = `
       <div class="resultado-card">
         <div class="resultado-titulo">${nombre}</div>
         <div class="resultado-meta">${artista}</div>
-        ${enCatalogo ? `<div class="resultado-desc">${enCatalogo.descripcion}</div>` : ''}
-        ${score ? `<div class="resultado-score">CONFIANZA: ${score}%</div>` : ''}
+        ${score ? `<div class="resultado-score" style="margin-bottom: 15px;">CONFIANZA: ${score}%</div>` : ''}
+        
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <a href="${urlYoutube}" target="_blank" style="flex: 1; text-decoration: none; background-color: #ff0000; color: white; padding: 10px; border-radius: 5px; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px; text-align: center; font-weight: bold;">
+                ▶️ VER EN YOUTUBE
+            </a>
+            <a href="${urlWhatsApp}" target="_blank" style="flex: 1; text-decoration: none; background-color: #25D366; color: white; padding: 10px; border-radius: 5px; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px; text-align: center; font-weight: bold;">
+                💬 COMPARTIR
+            </a>
+        </div>
       </div>
       <button class="btn-otra" onclick="resetIdentificar()">🎙️ ESCUCHAR OTRA MARCHA</button>
     `;
   } else if (data.status?.code === 1001) {
     wrap.innerHTML = `
       <div class="resultado-error">
-        <strong>Marcha no encontrada en la base de datos.</strong><br/><br/>
-        Esto significa que aún no tiene huella digital registrada. Puedes:
-        <br/>• Añadirla al catálogo colaborativo en la pestaña <strong>Aportar</strong>
-        <br/>• Consultar en foros cofrades (muy activos en Facebook)
+        <strong>Marcha no reconocida.</strong><br/><br/>
+        Acércate un poco más a la banda, asegúrate de no tapar el micrófono e inténtalo cuando suene la melodía principal.
       </div>
       <button class="btn-otra" onclick="resetIdentificar()">🎙️ INTENTAR DE NUEVO</button>
     `;
   } else {
-    mostrarError(`Error en el servidor (${data.status?.msg || 'desconocido'}). Contacta al administrador.`);
+    mostrarError(`Error en el servidor (${data.status?.msg || 'desconocido'}).`);
   }
 }
 
