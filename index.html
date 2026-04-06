@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cofradam – Identifica la música de tu Semana Santa</title>
+  <title>Marchas Procesionales – Identifica la música de tu Semana Santa</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
   <style>
@@ -50,7 +50,7 @@
       overflow-x: auto;
     }
     nav button {
-      padding: 17px 28px;
+      padding: 17px 20px;
       background: none; border: none;
       border-bottom: 2px solid transparent;
       color: rgba(232,213,176,0.35);
@@ -152,7 +152,6 @@
       margin-bottom: 6px;
     }
     .resultado-meta { font-size: 15px; color: rgba(232,213,176,0.45); margin-bottom: 14px; }
-    .resultado-desc { font-size: 18px; line-height: 1.7; color: rgba(232,213,176,0.8); font-style: italic; }
     .resultado-score {
       margin-top: 14px; font-family: 'Cinzel', serif;
       font-size: 10px; letter-spacing: 2px;
@@ -175,116 +174,25 @@
     }
     .btn-otra:hover { border-color: var(--oro); color: var(--oro); }
 
-    /* ── CATÁLOGO ── */
-    .stats-row {
-      display: flex; gap: 0;
-      margin-bottom: 28px;
-      border: 1px solid var(--oro-border); border-radius: 5px;
-      overflow: hidden;
-    }
-    .stat {
-      flex: 1; text-align: center;
-      padding: 18px 8px;
-      border-right: 1px solid var(--oro-border);
-    }
-    .stat:last-child { border-right: none; }
-    .stat-n { font-family: 'Cinzel', serif; font-size: 26px; color: var(--oro); display: block; }
-    .stat-l { font-size: 10px; letter-spacing: 2px; color: rgba(232,213,176,0.3); font-family: 'Cinzel', serif; }
-
-    .busqueda {
-      width: 100%; padding: 13px 16px;
-      background: rgba(255,255,255,0.025);
-      border: 1px solid var(--oro-border);
-      border-radius: 3px; color: var(--crema);
-      font-family: 'Crimson Text', serif; font-size: 18px;
-      outline: none; margin-bottom: 20px; transition: border-color 0.2s;
-    }
-    .busqueda:focus { border-color: rgba(201,168,76,0.5); }
-    .busqueda::placeholder { color: rgba(232,213,176,0.2); font-style: italic; }
-
-    .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-    .filtro {
-      padding: 5px 14px; background: none;
-      border: 1px solid rgba(201,168,76,0.15);
-      color: rgba(232,213,176,0.35);
-      font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px;
-      cursor: pointer; border-radius: 2px; transition: all 0.2s;
-    }
-    .filtro.on { border-color: rgba(201,168,76,0.5); color: var(--oro); background: var(--oro-dim); }
-
-    .marcha {
-      border: 1px solid rgba(201,168,76,0.08);
-      border-radius: 4px; padding: 20px;
-      margin-bottom: 10px;
-      background: rgba(255,255,255,0.015);
-      transition: all 0.2s; cursor: default;
-    }
-    .marcha:hover { border-color: rgba(201,168,76,0.25); background: rgba(201,168,76,0.03); }
-    .marcha.comunidad { border-left: 3px solid rgba(100,200,130,0.4); }
-    .marcha-n { font-family: 'Cinzel', serif; font-size: 16px; color: var(--oro); margin-bottom: 5px; }
-    .marcha-m { font-size: 14px; color: rgba(232,213,176,0.38); margin-bottom: 7px; }
-    .marcha-d { font-size: 16px; color: rgba(232,213,176,0.6); font-style: italic; line-height: 1.5; }
-
-    .badge {
-      display: inline-block; padding: 2px 8px;
-      font-size: 10px; font-family: 'Cinzel', serif;
-      letter-spacing: 1px; border-radius: 2px; margin-right: 5px;
-    }
-    .b-cristo { background: rgba(120,20,30,0.3); border:1px solid rgba(180,50,50,0.3); color:rgba(232,150,150,0.8); }
-    .b-virgen { background: rgba(20,60,120,0.3); border:1px solid rgba(50,100,200,0.3); color:rgba(150,180,232,0.8); }
-    .b-com { background: rgba(39,100,50,0.3); border:1px solid rgba(39,174,96,0.3); color:rgba(100,220,140,0.8); }
-
-    /* ── APORTAR ── */
-    .aviso {
-      background: rgba(39,100,50,0.1); border: 1px solid rgba(39,174,96,0.2);
-      border-radius: 4px; padding: 14px 18px; margin-bottom: 28px;
-      font-size: 16px; color: rgba(150,220,150,0.7); line-height: 1.6;
-    }
-    .form { display: flex; flex-direction: column; gap: 18px; }
-    .fg label { display: block; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; color: rgba(201,168,76,0.55); margin-bottom: 7px; }
-    .fg input, .fg textarea, .fg select {
-      width: 100%; padding: 12px 15px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--oro-border); border-radius: 3px;
-      color: var(--crema); font-family: 'Crimson Text', serif;
-      font-size: 17px; outline: none; transition: border-color 0.2s;
-    }
-    .fg select option { background: #1a0f12; }
-    .fg input:focus, .fg textarea:focus, .fg select:focus { border-color: rgba(201,168,76,0.5); }
-    .btn-enviar {
-      width: 100%; padding: 15px;
-      background: var(--oro-dim); border: 1px solid var(--oro-border);
-      color: var(--oro); font-family: 'Cinzel', serif;
-      font-size: 12px; letter-spacing: 3px; cursor: pointer;
-      border-radius: 3px; transition: all 0.25s;
-    }
-    .btn-enviar:hover:not(:disabled) { background: rgba(201,168,76,0.25); border-color: var(--oro); }
-    .btn-enviar:disabled { opacity: 0.4; cursor: not-allowed; }
-    .ok-msg {
-      background: rgba(39,174,96,0.1); border: 1px solid rgba(39,174,96,0.3);
-      border-radius: 5px; padding: 32px 20px; text-align: center;
-      font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 2px;
-      color: rgba(150,232,180,0.8); line-height: 2;
-    }
-
-    /* ── HISTORIAL (⬇️ NUEVO ESTILO) ── */
+    /* ── HISTORIAL Y FAVORITOS ── */
     .historial-item {
       border: 1px solid rgba(201,168,76,0.08);
       border-radius: 4px; padding: 20px;
       margin-bottom: 10px;
       background: rgba(255,255,255,0.015);
-      display: flex; align-items: center;
+      display: flex; align-items: flex-start;
       transition: all 0.2s;
     }
     .historial-item:hover { border-color: rgba(201,168,76,0.25); background: rgba(201,168,76,0.03); }
     .btn-corazon {
-      cursor: pointer; font-size: 24px; margin-right: 18px;
+      cursor: pointer; font-size: 24px; margin-right: 18px; margin-top: 2px;
       color: rgba(232,213,176,0.3); transition: color 0.2s;
       user-select: none;
     }
     .btn-corazon.fav { color: var(--rojo); }
     .historial-n { font-family: 'Cinzel', serif; font-size: 18px; color: var(--oro); margin-bottom: 4px; }
     .historial-f { font-size: 13px; color: rgba(232,213,176,0.4); font-family: 'Cinzel', serif; letter-spacing: 1px;}
+    
     .btn-borrar-historial {
       margin-top: 20px; width: 100%; padding: 13px; background: rgba(139,26,26,0.1);
       border: 1px solid rgba(139,26,26,0.4); color: rgba(232,150,150,0.8);
@@ -292,6 +200,27 @@
       cursor: pointer; border-radius: 3px; transition: all 0.2s;
     }
     .btn-borrar-historial:hover { background: rgba(139,26,26,0.25); border-color: rgba(139,26,26,0.6); }
+
+    /* ── BOTONES ACCIÓN (YouTube/WhatsApp) ── */
+    .botones-accion {
+      display: flex; gap: 10px; margin-top: 15px;
+    }
+    .btn-accion {
+      flex: 1; text-decoration: none; padding: 10px; border-radius: 5px; 
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px; 
+      text-align: center; font-weight: bold; transition: opacity 0.2s;
+    }
+    .btn-accion:hover { opacity: 0.8; }
+    .btn-yt { background-color: #cd201f; color: white; }
+    .btn-wa { background-color: #25D366; color: white; }
+
+    /* Botones pequeños para las listas */
+    .btn-min {
+      text-decoration: none; padding: 6px 12px; border-radius: 4px;
+      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1px;
+      font-weight: bold; opacity: 0.85; transition: opacity 0.2s;
+    }
+    .btn-min:hover { opacity: 1; }
 
     /* ── FOOTER ── */
     footer {
@@ -315,13 +244,14 @@
 
 <header class="hero">
   <span class="cruz">✝</span>
-  <h1>MARCHAS PROCESIONALES</h1>
+  <h1>COFRADAM</h1>
   <p class="subtitle">Identifica la música de tu Semana Santa en tiempo real</p>
 </header>
 
 <nav>
   <button class="active" onclick="cambiarTab('identificar', this)">🎺 IDENTIFICAR</button>
   <button onclick="cambiarTab('historial', this)">📖 HISTORIAL</button>
+  <button onclick="cambiarTab('favoritos', this)">❤️ FAVORITOS</button>
 </nav>
 
 <main>
@@ -337,83 +267,32 @@
         <div class="timer-fill" id="timer-fill"></div>
       </div>
     </div>
-
     <div id="resultado-wrap" style="display:none"></div>
-  </div>
-
-  <div class="tab-panel" id="tab-catalogo">
-    <div class="stats-row">
-      <div class="stat"><span class="stat-n" id="cnt-base">15</span><span class="stat-l">BASE</span></div>
-      <div class="stat"><span class="stat-n" id="cnt-com" style="color:rgba(100,220,140,0.9)">0</span><span class="stat-l">COMUNIDAD</span></div>
-      <div class="stat"><span class="stat-n" id="cnt-total">15</span><span class="stat-l">TOTAL</span></div>
-      <div class="stat"><span class="stat-n" id="cnt-ciudades">3</span><span class="stat-l">CIUDADES</span></div>
-    </div>
-    <input class="busqueda" id="buscador" placeholder="Buscar por nombre, compositor, hermandad, ciudad..." oninput="renderCatalogo()"/>
-    <div class="filtros" id="filtros-wrap"></div>
-    <div id="lista-marchas"></div>
-  </div>
-
-  <div class="tab-panel" id="tab-aportar">
-    <div class="aviso">
-      🌍 Las marchas que añadas serán <strong>visibles para todos los usuarios</strong> al instante.
-      Entre todos construimos el catálogo más completo de música procesional española.
-    </div>
-    <div id="form-wrap">
-      <div class="form">
-        <div class="fg"><label>NOMBRE DE LA MARCHA *</label><input id="f-nombre" placeholder="Ej: Amarguras"/></div>
-        <div class="fg"><label>COMPOSITOR</label><input id="f-comp" placeholder="Ej: Manuel Font de Anta"/></div>
-        <div class="fg"><label>AÑO DE COMPOSICIÓN</label><input id="f-año" type="number" placeholder="Ej: 1919"/></div>
-        <div class="fg"><label>CIUDAD / REGIÓN *</label><input id="f-ciudad" placeholder="Ej: Sevilla, Málaga..."/></div>
-        <div class="fg"><label>HERMANDAD O COFRADÍA</label><input id="f-herm" placeholder="Ej: Esperanza Macarena"/></div>
-        <div class="fg">
-          <label>TIPO</label>
-          <select id="f-tipo"><option>Cristo</option><option>Virgen</option><option>Mixta</option></select>
-        </div>
-        <div class="fg">
-          <label>DESCRIPCIÓN (cómo suena, qué transmite...)</label>
-          <textarea id="f-desc" rows="3" placeholder="Describe el carácter musical, cuándo se suele tocar, la emoción que transmite..."></textarea>
-        </div>
-        <button class="btn-enviar" id="btn-enviar" onclick="enviarAporte()">✚ AÑADIR AL CATÁLOGO COMPARTIDO</button>
-      </div>
-    </div>
   </div>
 
   <div class="tab-panel" id="tab-historial">
     <div style="text-align: center; margin-bottom: 24px;">
       <h2 style="font-family: 'Cinzel', serif; font-size: 22px; color: var(--oro); letter-spacing: 2px;">Tu Libreta de Marchas</h2>
-      <p style="color: rgba(232,213,176,0.5); font-size: 16px; margin-top: 8px;">Aquí se guardan automáticamente las marchas que vas identificando.</p>
+      <p style="color: rgba(232,213,176,0.5); font-size: 16px; margin-top: 8px;">Las marchas que cazas se guardan aquí automáticamente.</p>
     </div>
     <div id="lista-historial"></div>
   </div>
 
+  <div class="tab-panel" id="tab-favoritos">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <h2 style="font-family: 'Cinzel', serif; font-size: 22px; color: var(--oro); letter-spacing: 2px;">Tus Marchas Favoritas</h2>
+      <p style="color: rgba(232,213,176,0.5); font-size: 16px; margin-top: 8px;">Toca el corazón de cualquier marcha para guardarla aquí.</p>
+    </div>
+    <div id="lista-favoritos"></div>
+  </div>
+
 </main>
 
-<footer id="footer-counter">15 MARCHAS EN CATÁLOGO · 0 APORTADAS POR LA COMUNIDAD</footer>
+<footer>Cofradam · TU MÚSICA DE SEMANA SANTA</footer>
 
 <script>
 // ═══════════════════════════════════════════════
-// DATOS BASE
-// ═══════════════════════════════════════════════
-const MARCHAS_BASE = [
-  {id:"b1",nombre:"Amarguras",compositor:"Manuel Font de Anta",año:1919,tipo:"Virgen",ciudad:"Sevilla",hermandad:"Jesús del Gran Poder",descripcion:"Considerada el himno nacional cofrade. Lenta, solemne, de melancolía profunda."},
-  {id:"b2",nombre:"Pasan los Campanilleros",compositor:"Manuel López Farfán",año:1928,tipo:"Cristo",ciudad:"Sevilla",hermandad:"Esperanza de Triana",descripcion:"Alegre y brillante, evoca el sonido de los campanilleros abriendo paso."},
-  {id:"b3",nombre:"La Macarena",compositor:"Pérez Moya",año:1941,tipo:"Virgen",ciudad:"Sevilla",hermandad:"Esperanza Macarena",descripcion:"Marcha festera por excelencia. Vibrante y emocionante, una de las más populares."},
-  {id:"b4",nombre:"Triana",compositor:"José Albero Francés",año:1943,tipo:"Virgen",ciudad:"Sevilla",hermandad:"Esperanza de Triana",descripcion:"Evoca el barrio de Triana con carácter flamenco y emotivo."},
-  {id:"b5",nombre:"El Refugio",compositor:"Abel Moreno",año:2001,tipo:"Cristo",ciudad:"Sevilla",hermandad:"El Refugio",descripcion:"Marcha moderna de gran profundidad emocional, muy querida por los cofrades."},
-  {id:"b6",nombre:"Virgen de la Esperanza",compositor:"Pascual Marquina",año:1935,tipo:"Virgen",ciudad:"Málaga",hermandad:"Cofradía de la Esperanza",descripcion:"Marcha malagueña festera y luminosa, con un carácter claramente andaluz."},
-  {id:"b7",nombre:"Coronación de la Macarena",compositor:"Pascual Marquina",año:1964,tipo:"Virgen",ciudad:"Sevilla",hermandad:"Esperanza Macarena",descripcion:"Compuesta para la coronación canónica. Majestuosa y grandiosa."},
-  {id:"b8",nombre:"Soleá dame la mano",compositor:"Fernando Morales Muñoz",año:1980,tipo:"Virgen",ciudad:"Sevilla",hermandad:"Soledad de San Lorenzo",descripcion:"Íntima y recogida, de gran belleza melódica. Muy interpretada."},
-  {id:"b9",nombre:"Cristo de los Gitanos",compositor:"Eduardo Saborido",año:1968,tipo:"Cristo",ciudad:"Granada",hermandad:"Sacromonte",descripcion:"Con influencias flamencas, evoca la pasión desde la perspectiva gitana granadina."},
-  {id:"b10",nombre:"La Lanzada",compositor:"Juan Antonio Talavera",año:1990,tipo:"Cristo",ciudad:"Sevilla",hermandad:"La Lanzada",descripcion:"Marcha potente y dramática que narra el momento de la lanzada a Cristo."},
-  {id:"b11",nombre:"Jesús de la Sentencia",compositor:"Manuel Marvizón",año:1955,tipo:"Cristo",ciudad:"Sevilla",hermandad:"La Macarena",descripcion:"Solemne procesional que acompaña a Cristo ante Pilatos. Cargada de dramatismo."},
-  {id:"b12",nombre:"Penas de Pedro",compositor:"Eduardo Saborido",año:1960,tipo:"Cristo",ciudad:"Sevilla",hermandad:"Varias",descripcion:"Narración musical del llanto de Pedro tras negar a Cristo. Muy expresiva."},
-  {id:"b13",nombre:"Doliente",compositor:"Pascual Marquina",año:1930,tipo:"Virgen",ciudad:"Sevilla",hermandad:"Varias",descripcion:"Una de las más antiguas del repertorio cofrade. Clásica y elegante."},
-  {id:"b14",nombre:"Paso de Palio",compositor:"Abel Moreno",año:1997,tipo:"Virgen",ciudad:"Sevilla",hermandad:"Varias",descripcion:"Evoca el movimiento ondulante de un palio procesionando."},
-  {id:"b15",nombre:"Madre de Dios del Rosario",compositor:"Rafael Suárez",año:2003,tipo:"Virgen",ciudad:"Sevilla",hermandad:"Rosario de los Montesión",descripcion:"Marcha reciente de gran lirismo, muy interpretada por bandas modernas."},
-];
-
-// ═══════════════════════════════════════════════
-// GRABACIÓN Y RECONOCIMIENTO (Vía Netlify Functions)
+// GRABACIÓN Y RECONOCIMIENTO
 // ═══════════════════════════════════════════════
 let mediaRecorder = null;
 let audioChunks   = [];
@@ -422,11 +301,8 @@ let timerInterval = null;
 const DURACION    = 8; // segundos de grabación
 
 function toggleGrabacion() {
-  if (grabando) {
-    detenerGrabacion();
-  } else {
-    iniciarGrabacion();
-  }
+  if (grabando) detenerGrabacion();
+  else iniciarGrabacion();
 }
 
 async function iniciarGrabacion() {
@@ -445,7 +321,6 @@ async function iniciarGrabacion() {
     grabando = true;
     setEstado('grabando');
 
-    // Timer visual
     let elapsed = 0;
     const fill = document.getElementById('timer-fill');
     document.getElementById('timer-bar').classList.add('visible');
@@ -474,7 +349,6 @@ async function procesarAudio() {
   const arrayBuffer = await blob.arrayBuffer();
   const bytes = new Uint8Array(arrayBuffer);
 
-  // Convertimos el audio a texto Base64 para enviarlo fácil al backend
   let binary = '';
   for (let i = 0; i < bytes.byteLength; i++) {
       binary += String.fromCharCode(bytes[i]);
@@ -482,7 +356,6 @@ async function procesarAudio() {
   const base64Audio = btoa(binary);
 
   try {
-    // Llamamos a nuestra propia función segura de Netlify
     const res = await fetch('/.netlify/functions/identificar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -508,13 +381,12 @@ function mostrarResultado(data) {
     const artista = m.artists?.map(a=>a.name).join(', ') || m.album?.name || '';
     const score = m.score || '';
 
-    // Guardamos en la libreta (Historial)
+    // Guardamos en la libreta
     guardarEnHistorial(nombre);
 
-    // ⬇️ MAGIA: Creamos los enlaces dinámicos para YouTube y WhatsApp ⬇️
+    // Enlaces de YouTube y WhatsApp
     const textoBusqueda = nombre + " marcha semana santa";
     const urlYoutube = "https://www.youtube.com/results?search_query=" + encodeURIComponent(textoBusqueda);
-    
     const textoWhatsApp = "🎺 Acabo de escuchar la marcha *" + nombre + "* en la calle. ¡Cazada con mi Shazam Cofrade! 📱";
     const urlWhatsApp = "https://api.whatsapp.com/send?text=" + encodeURIComponent(textoWhatsApp);
 
@@ -522,15 +394,11 @@ function mostrarResultado(data) {
       <div class="resultado-card">
         <div class="resultado-titulo">${nombre}</div>
         <div class="resultado-meta">${artista}</div>
-        ${score ? `<div class="resultado-score" style="margin-bottom: 15px;">CONFIANZA: ${score}%</div>` : ''}
+        ${score ? `<div class="resultado-score">CONFIANZA: ${score}%</div>` : ''}
         
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <a href="${urlYoutube}" target="_blank" style="flex: 1; text-decoration: none; background-color: #ff0000; color: white; padding: 10px; border-radius: 5px; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px; text-align: center; font-weight: bold;">
-                ▶️ VER EN YOUTUBE
-            </a>
-            <a href="${urlWhatsApp}" target="_blank" style="flex: 1; text-decoration: none; background-color: #25D366; color: white; padding: 10px; border-radius: 5px; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px; text-align: center; font-weight: bold;">
-                💬 COMPARTIR
-            </a>
+        <div class="botones-accion">
+            <a href="${urlYoutube}" target="_blank" class="btn-accion btn-yt">▶️ VER EN YOUTUBE</a>
+            <a href="${urlWhatsApp}" target="_blank" class="btn-accion btn-wa">💬 COMPARTIR</a>
         </div>
       </div>
       <button class="btn-otra" onclick="resetIdentificar()">🎙️ ESCUCHAR OTRA MARCHA</button>
@@ -603,145 +471,6 @@ function getSupportedMimeType() {
 }
 
 // ═══════════════════════════════════════════════
-// CATÁLOGO COMPARTIDO (localStorage para demo,
-// en producción real usar Supabase/Firebase)
-// ═══════════════════════════════════════════════
-function cargarComunidad() {
-  try { return JSON.parse(localStorage.getItem('marchas_comunidad') || '[]'); }
-  catch { return []; }
-}
-function guardarComunidad(arr) {
-  localStorage.setItem('marchas_comunidad', JSON.stringify(arr));
-}
-function todasLasMarchas() {
-  return [...MARCHAS_BASE, ...cargarComunidad()];
-}
-
-// ═══════════════════════════════════════════════
-// CATÁLOGO UI
-// ═══════════════════════════════════════════════
-let filtroActivo = 'Todos';
-
-function renderCatalogo() {
-  const todas = todasLasMarchas();
-  const comunidad = cargarComunidad();
-  const q = document.getElementById('buscador').value.toLowerCase();
-  const ciudades = [...new Set(todas.map(m=>m.ciudad))].sort();
-
-  // Stats
-  document.getElementById('cnt-base').textContent   = MARCHAS_BASE.length;
-  document.getElementById('cnt-com').textContent    = comunidad.length;
-  document.getElementById('cnt-total').textContent  = todas.length;
-  document.getElementById('cnt-ciudades').textContent = ciudades.length;
-
-  // Filtros
-  const fw = document.getElementById('filtros-wrap');
-  const filtros = ['Todos','Cristo','Virgen','Comunidad',...ciudades];
-  fw.innerHTML = filtros.map(f=>`
-    <button class="filtro ${filtroActivo===f?'on':''}" onclick="setFiltro('${f}')">${f}</button>
-  `).join('');
-
-  // Lista
-  const filtradas = todas.filter(m => {
-    const mF = filtroActivo==='Todos' ? true :
-               filtroActivo==='Cristo' ? m.tipo==='Cristo' :
-               filtroActivo==='Virgen' ? m.tipo==='Virgen' :
-               filtroActivo==='Comunidad' ? m.esComunidad :
-               m.ciudad === filtroActivo;
-    const mQ = !q || [m.nombre,m.compositor,m.hermandad,m.ciudad].some(v=>(v||'').toLowerCase().includes(q));
-    return mF && mQ;
-  });
-
-  const lista = document.getElementById('lista-marchas');
-  if (!filtradas.length) {
-    lista.innerHTML = '<p style="text-align:center;padding:40px;color:rgba(232,213,176,0.25);font-style:italic">No se encontraron marchas</p>';
-    return;
-  }
-  lista.innerHTML = filtradas.map(m=>`
-    <div class="marcha ${m.esComunidad?'comunidad':''}">
-      <div class="marcha-n">${m.nombre}</div>
-      <div class="marcha-m">
-        <span class="badge b-${(m.tipo||'').toLowerCase()}">${m.tipo}</span>
-        ${m.esComunidad?'<span class="badge b-com">COMUNIDAD</span>':''}
-        ${[m.compositor,m.año,m.ciudad].filter(Boolean).join(' · ')}
-      </div>
-      ${m.hermandad?`<div class="marcha-m">${m.hermandad}</div>`:''}
-      ${m.descripcion?`<div class="marcha-d">${m.descripcion}</div>`:''}
-    </div>
-  `).join('');
-
-  actualizarFooter();
-}
-
-function setFiltro(f) { filtroActivo = f; renderCatalogo(); }
-
-function actualizarFooter() {
-  const com = cargarComunidad().length;
-  document.getElementById('footer-counter').textContent =
-    `${todasLasMarchas().length} MARCHAS EN CATÁLOGO · ${com} APORTADAS POR LA COMUNIDAD`;
-}
-
-// ═══════════════════════════════════════════════
-// APORTAR
-// ═══════════════════════════════════════════════
-async function enviarAporte() {
-  const nombre = document.getElementById('f-nombre').value.trim();
-  const ciudad = document.getElementById('f-ciudad').value.trim();
-  if (!nombre || !ciudad) return;
-
-  document.getElementById('btn-enviar').disabled = true;
-  document.getElementById('btn-enviar').innerHTML = '<span class="spinner"></span>GUARDANDO...';
-
-  const nueva = {
-    id: `c_${Date.now()}`,
-    nombre,
-    compositor: document.getElementById('f-comp').value.trim(),
-    año: parseInt(document.getElementById('f-año').value) || null,
-    ciudad,
-    hermandad: document.getElementById('f-herm').value.trim(),
-    tipo: document.getElementById('f-tipo').value,
-    descripcion: document.getElementById('f-desc').value.trim(),
-    esComunidad: true,
-    timestamp: Date.now(),
-  };
-
-  const arr = cargarComunidad();
-  arr.unshift(nueva);
-  guardarComunidad(arr);
-
-  await new Promise(r => setTimeout(r, 600)); // simula latencia
-
-  document.getElementById('form-wrap').innerHTML = `
-    <div class="ok-msg">
-      ✝ &nbsp; ¡GRACIAS POR TU APORTACIÓN! &nbsp; ✝<br/>
-      <span style="font-family:'Crimson Text';font-size:16px;letter-spacing:normal;opacity:.7">
-        "${nueva.nombre}" ya está visible en el catálogo para todos los cofrades
-      </span>
-    </div>
-  `;
-
-  renderCatalogo();
-  setTimeout(() => {
-    document.getElementById('form-wrap').innerHTML = getFormHTML();
-    document.getElementById('btn-enviar').disabled = false;
-    document.getElementById('btn-enviar').textContent = '✚ AÑADIR AL CATÁLOGO COMPARTIDO';
-  }, 4000);
-}
-
-function getFormHTML() {
-  return `<div class="form">
-    <div class="fg"><label>NOMBRE DE LA MARCHA *</label><input id="f-nombre" placeholder="Ej: Amarguras"/></div>
-    <div class="fg"><label>COMPOSITOR</label><input id="f-comp" placeholder="Ej: Manuel Font de Anta"/></div>
-    <div class="fg"><label>AÑO DE COMPOSICIÓN</label><input id="f-año" type="number" placeholder="Ej: 1919"/></div>
-    <div class="fg"><label>CIUDAD / REGIÓN *</label><input id="f-ciudad" placeholder="Ej: Sevilla, Málaga..."/></div>
-    <div class="fg"><label>HERMANDAD O COFRADÍA</label><input id="f-herm" placeholder="Ej: Esperanza Macarena"/></div>
-    <div class="fg"><label>TIPO</label><select id="f-tipo"><option>Cristo</option><option>Virgen</option><option>Mixta</option></select></div>
-    <div class="fg"><label>DESCRIPCIÓN</label><textarea id="f-desc" rows="3" placeholder="Describe el carácter musical..."></textarea></div>
-    <button class="btn-enviar" id="btn-enviar" onclick="enviarAporte()">✚ AÑADIR AL CATÁLOGO COMPARTIDO</button>
-  </div>`;
-}
-
-// ═══════════════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════════════
 function cambiarTab(id, btn) {
@@ -749,12 +478,13 @@ function cambiarTab(id, btn) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'catalogo') renderCatalogo();
-  if (id === 'historial') mostrarHistorial(); // ⬇️ NUEVO
+  
+  if (id === 'historial') mostrarHistorial();
+  if (id === 'favoritos') mostrarFavoritos();
 }
 
 // ═══════════════════════════════════════════════
-// HISTORIAL (⬇️ NUEVAS FUNCIONES)
+// HISTORIAL Y FAVORITOS
 // ═══════════════════════════════════════════════
 function guardarEnHistorial(nombreMarcha) {
   let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
@@ -762,7 +492,6 @@ function guardarEnHistorial(nombreMarcha) {
   const ahora = new Date();
   const fechaBonita = ahora.toLocaleDateString() + ' - ' + ahora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-  // Si la última marcha que identificó es exactamente esta, no la duplicamos
   if(historial.length > 0 && historial[0].nombre === nombreMarcha) return;
 
   const nuevaMarcha = {
@@ -774,8 +503,10 @@ function guardarEnHistorial(nombreMarcha) {
   historial.unshift(nuevaMarcha);
   localStorage.setItem('misMarchas', JSON.stringify(historial));
   mostrarHistorial();
+  mostrarFavoritos();
 }
 
+// Dibuja el panel de Historial (Todas las marchas)
 function mostrarHistorial() {
   const lista = document.getElementById('lista-historial');
   if (!lista) return;
@@ -792,12 +523,21 @@ function mostrarHistorial() {
   historial.forEach((marcha, index) => {
     const corazon = marcha.favorito ? '❤️' : '🤍';
     const claseFav = marcha.favorito ? 'fav' : '';
+    
+    // Enlaces para cada item
+    const urlYoutube = "https://www.youtube.com/results?search_query=" + encodeURIComponent(marcha.nombre + " marcha semana santa");
+    const urlWhatsApp = "https://api.whatsapp.com/send?text=" + encodeURIComponent("🎺 Acabo de escuchar *" + marcha.nombre + "*. ¡Cazada con mi Shazam Cofrade! 📱");
+
     html += `
       <div class="historial-item">
         <span class="btn-corazon ${claseFav}" onclick="marcarFavorito(${index})">${corazon}</span>
-        <div>
+        <div style="flex:1;">
           <div class="historial-n">${marcha.nombre}</div>
           <div class="historial-f">${marcha.fecha}</div>
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+             <a href="${urlYoutube}" target="_blank" class="btn-min btn-yt">▶️ YouTube</a>
+             <a href="${urlWhatsApp}" target="_blank" class="btn-min btn-wa">💬 Compartir</a>
+          </div>
         </div>
       </div>
     `;
@@ -807,25 +547,66 @@ function mostrarHistorial() {
   lista.innerHTML = html;
 }
 
+// Dibuja SOLO las marchas favoritas en su pestaña
+function mostrarFavoritos() {
+  const lista = document.getElementById('lista-favoritos');
+  if (!lista) return;
+
+  let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
+  let html = '';
+  let hayFavoritos = false;
+
+  historial.forEach((marcha, index) => {
+    if(marcha.favorito) {
+        hayFavoritos = true;
+        const urlYoutube = "https://www.youtube.com/results?search_query=" + encodeURIComponent(marcha.nombre + " marcha semana santa");
+        const urlWhatsApp = "https://api.whatsapp.com/send?text=" + encodeURIComponent("🎺 Acabo de escuchar *" + marcha.nombre + "*. ¡Cazada con mi Shazam Cofrade! 📱");
+
+        html += `
+          <div class="historial-item">
+            <span class="btn-corazon fav" onclick="marcarFavorito(${index})">❤️</span>
+            <div style="flex:1;">
+              <div class="historial-n">${marcha.nombre}</div>
+              <div class="historial-f">${marcha.fecha}</div>
+              <div style="display: flex; gap: 8px; margin-top: 12px;">
+                 <a href="${urlYoutube}" target="_blank" class="btn-min btn-yt">▶️ YouTube</a>
+                 <a href="${urlWhatsApp}" target="_blank" class="btn-min btn-wa">💬 Compartir</a>
+              </div>
+            </div>
+          </div>
+        `;
+    }
+  });
+
+  if (!hayFavoritos) {
+    lista.innerHTML = '<p style="text-align:center;padding:40px;color:rgba(232,213,176,0.25);font-style:italic">Aún no tienes marchas favoritas.<br><br>Ve a tu Historial y pulsa en el corazón 🤍 para guardarlas aquí.</p>';
+  } else {
+    lista.innerHTML = html;
+  }
+}
+
+// Cambiar el estado del corazón
 function marcarFavorito(index) {
   let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
   historial[index].favorito = !historial[index].favorito; 
   localStorage.setItem('misMarchas', JSON.stringify(historial));
+  
+  // Actualizamos ambas listas a la vez para que se reflejen los cambios al instante
   mostrarHistorial(); 
+  mostrarFavoritos();
 }
 
 function borrarHistorial() {
-  if(confirm('¿Seguro que quieres borrar todas tus marchas identificadas?')) {
+  if(confirm('¿Seguro que quieres borrar TODAS tus marchas? (También se borrarán los favoritos)')) {
     localStorage.removeItem('misMarchas');
     mostrarHistorial();
+    mostrarFavoritos();
   }
 }
 
-// ═══════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════
-renderCatalogo();
-mostrarHistorial(); // ⬇️ NUEVO
+mostrarHistorial();
+mostrarFavoritos();
 </script>
 </body>
 </html>
