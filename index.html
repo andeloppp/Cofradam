@@ -381,7 +381,7 @@ async function procesarAudio() {
     reader.onloadend = async () => {
         const base64Audio = reader.result.split(',')[1];
         try {
-            const res = await fetch('/.netlify/functions/identificar', {
+            const res = await fetch('/api/identificar', {
                 method: 'POST',
                 body: JSON.stringify({ audioBase64: base64Audio })
             });
