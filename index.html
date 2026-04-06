@@ -4,8 +4,12 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Marchas Procesionales – Identifica la música de tu Semana Santa</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+
   <style>
     :root {
       --oro: #c9a84c;
@@ -134,41 +138,24 @@
     }
     .timer-fill.grabando-fill { background: linear-gradient(90deg, #e74c3c, rgba(220,100,80,0.4)); }
 
-    .resultado-wrap {
-      margin-top: 28px;
-      animation: aparecer 0.5s ease;
-    }
+    .resultado-wrap { margin-top: 28px; animation: aparecer 0.5s ease; }
     @keyframes aparecer { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
 
     .resultado-card {
-      background: rgba(201,168,76,0.04);
-      border: 1px solid rgba(201,168,76,0.2);
-      border-radius: 5px;
-      padding: 26px;
+      background: rgba(201,168,76,0.04); border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 5px; padding: 26px;
     }
-    .resultado-titulo {
-      font-family: 'Cinzel', serif;
-      font-size: 22px; color: var(--oro);
-      margin-bottom: 6px;
-    }
+    .resultado-titulo { font-family: 'Cinzel', serif; font-size: 22px; color: var(--oro); margin-bottom: 6px; }
     .resultado-meta { font-size: 15px; color: rgba(232,213,176,0.45); margin-bottom: 14px; }
-    .resultado-score {
-      margin-top: 14px; font-family: 'Cinzel', serif;
-      font-size: 10px; letter-spacing: 2px;
-      color: rgba(201,168,76,0.4);
-    }
+    .resultado-score { margin-top: 14px; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px; color: rgba(201,168,76,0.4); }
     .resultado-error {
-      background: rgba(139,26,26,0.15);
-      border: 1px solid rgba(139,26,26,0.4);
-      border-radius: 5px; padding: 22px;
-      color: rgba(232,180,150,0.8); font-size: 17px; line-height: 1.6;
+      background: rgba(139,26,26,0.15); border: 1px solid rgba(139,26,26,0.4);
+      border-radius: 5px; padding: 22px; color: rgba(232,180,150,0.8); font-size: 17px; line-height: 1.6;
     }
 
     .btn-otra {
-      margin-top: 16px; width: 100%;
-      padding: 13px; background: none;
-      border: 1px solid rgba(201,168,76,0.2);
-      color: rgba(201,168,76,0.5);
+      margin-top: 16px; width: 100%; padding: 13px; background: none;
+      border: 1px solid rgba(201,168,76,0.2); color: rgba(201,168,76,0.5);
       font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px;
       cursor: pointer; border-radius: 3px; transition: all 0.2s;
     }
@@ -176,22 +163,20 @@
 
     /* ── HISTORIAL Y FAVORITOS ── */
     .historial-item {
-      border: 1px solid rgba(201,168,76,0.08);
-      border-radius: 4px; padding: 20px;
-      margin-bottom: 10px;
-      background: rgba(255,255,255,0.015);
-      display: flex; align-items: flex-start;
-      transition: all 0.2s;
+      border: 1px solid rgba(201,168,76,0.08); border-radius: 4px; padding: 20px;
+      margin-bottom: 10px; background: rgba(255,255,255,0.015);
+      display: flex; align-items: flex-start; transition: all 0.2s;
     }
     .historial-item:hover { border-color: rgba(201,168,76,0.25); background: rgba(201,168,76,0.03); }
     .btn-corazon {
       cursor: pointer; font-size: 24px; margin-right: 18px; margin-top: 2px;
-      color: rgba(232,213,176,0.3); transition: color 0.2s;
-      user-select: none;
+      color: rgba(232,213,176,0.3); transition: color 0.2s; user-select: none;
     }
     .btn-corazon.fav { color: var(--rojo); }
     .historial-n { font-family: 'Cinzel', serif; font-size: 18px; color: var(--oro); margin-bottom: 4px; }
+    .historial-n.pendiente { color: #e74c3c; font-style: italic; }
     .historial-f { font-size: 13px; color: rgba(232,213,176,0.4); font-family: 'Cinzel', serif; letter-spacing: 1px;}
+    .historial-ubi { font-size: 12px; color: rgba(201,168,76,0.7); margin-top: 6px; font-family: sans-serif; display: flex; align-items: center; gap: 4px;}
     
     .btn-borrar-historial {
       margin-top: 20px; width: 100%; padding: 13px; background: rgba(139,26,26,0.1);
@@ -201,41 +186,35 @@
     }
     .btn-borrar-historial:hover { background: rgba(139,26,26,0.25); border-color: rgba(139,26,26,0.6); }
 
-    /* ── BOTONES ACCIÓN (YouTube/WhatsApp) ── */
-    .botones-accion {
-      display: flex; gap: 10px; margin-top: 15px;
-    }
+    /* ── BOTONES ACCIÓN ── */
+    .botones-accion { display: flex; gap: 10px; margin-top: 15px; }
     .btn-accion {
       flex: 1; text-decoration: none; padding: 10px; border-radius: 5px; 
       font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px; 
-      text-align: center; font-weight: bold; transition: opacity 0.2s;
+      text-align: center; font-weight: bold; transition: opacity 0.2s; cursor: pointer; border: none;
     }
-    .btn-accion:hover { opacity: 0.8; }
+    .btn-accion:hover:not(:disabled) { opacity: 0.8; }
+    .btn-accion:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-yt { background-color: #cd201f; color: white; }
     .btn-wa { background-color: #25D366; color: white; }
+    
+    .btn-play { background-color: rgba(201,168,76,0.2); color: var(--oro); border: 1px solid var(--oro); }
+    .btn-nombrar { background-color: var(--oro); color: #000; }
 
-    /* Botones pequeños para las listas */
     .btn-min {
       text-decoration: none; padding: 6px 12px; border-radius: 4px;
       font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1px;
-      font-weight: bold; opacity: 0.85; transition: opacity 0.2s;
+      font-weight: bold; opacity: 0.85; transition: opacity 0.2s; cursor: pointer; border: none;
     }
     .btn-min:hover { opacity: 1; }
 
-    /* ── FOOTER ── */
     footer {
-      text-align: center; padding: 20px;
-      font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px;
-      color: rgba(232,213,176,0.18);
-      border-top: 1px solid rgba(201,168,76,0.08);
-      margin-top: 40px;
+      text-align: center; padding: 20px; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px;
+      color: rgba(232,213,176,0.18); border-top: 1px solid rgba(201,168,76,0.08); margin-top: 40px;
     }
-
     .spinner {
-      display: inline-block; width: 13px; height: 13px;
-      border: 2px solid rgba(201,168,76,0.2);
-      border-top-color: var(--oro); border-radius: 50%;
-      animation: girar 0.8s linear infinite; margin-right: 8px; vertical-align: middle;
+      display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(201,168,76,0.2);
+      border-top-color: var(--oro); border-radius: 50%; animation: girar 0.8s linear infinite; margin-right: 8px; vertical-align: middle;
     }
     @keyframes girar { to{transform:rotate(360deg)} }
   </style>
@@ -244,7 +223,7 @@
 
 <header class="hero">
   <span class="cruz">✝</span>
-  <h1>COFRADAM</h1>
+  <h1>MARCHAS PROCESIONALES</h1>
   <p class="subtitle">Identifica la música de tu Semana Santa en tiempo real</p>
 </header>
 
@@ -255,7 +234,6 @@
 </nav>
 
 <main>
-
   <div class="tab-panel active" id="tab-identificar">
     <div class="escuchar-section">
       <div class="mic-wrap">
@@ -273,7 +251,7 @@
   <div class="tab-panel" id="tab-historial">
     <div style="text-align: center; margin-bottom: 24px;">
       <h2 style="font-family: 'Cinzel', serif; font-size: 22px; color: var(--oro); letter-spacing: 2px;">Tu Libreta de Marchas</h2>
-      <p style="color: rgba(232,213,176,0.5); font-size: 16px; margin-top: 8px;">Las marchas que cazas se guardan aquí automáticamente.</p>
+      <p style="color: rgba(232,213,176,0.5); font-size: 16px; margin-top: 8px;">Las marchas que cazas y tus grabaciones se guardan aquí.</p>
     </div>
     <div id="lista-historial"></div>
   </div>
@@ -281,25 +259,31 @@
   <div class="tab-panel" id="tab-favoritos">
     <div style="text-align: center; margin-bottom: 24px;">
       <h2 style="font-family: 'Cinzel', serif; font-size: 22px; color: var(--oro); letter-spacing: 2px;">Tus Marchas Favoritas</h2>
-      <p style="color: rgba(232,213,176,0.5); font-size: 16px; margin-top: 8px;">Toca el corazón de cualquier marcha para guardarla aquí.</p>
     </div>
     <div id="lista-favoritos"></div>
   </div>
-
 </main>
 
-<footer>Cofradam · TU MÚSICA DE SEMANA SANTA</footer>
+<footer>SHAZAM COFRADE · TU MÚSICA DE SEMANA SANTA</footer>
 
 <script>
 // ═══════════════════════════════════════════════
-// GRABACIÓN Y RECONOCIMIENTO
+// VARIABLES GLOBALES Y CONFIGURACIÓN
 // ═══════════════════════════════════════════════
 let mediaRecorder = null;
 let audioChunks   = [];
 let grabando      = false;
 let timerInterval = null;
-const DURACION    = 8; // segundos de grabación
+const DURACION    = 12; // 12 segundos
+let audioBlobTemporal = null; // Guarda el audio temporal antes de decidir si borrarlo
+let reproductorActual = null;
 
+// Configurar base de datos profunda para audios
+localforage.config({ name: 'ShazamCofrade', storeName: 'audios_grabados' });
+
+// ═══════════════════════════════════════════════
+// GRABACIÓN DE AUDIO
+// ═══════════════════════════════════════════════
 function toggleGrabacion() {
   if (grabando) detenerGrabacion();
   else iniciarGrabacion();
@@ -332,7 +316,7 @@ async function iniciarGrabacion() {
     }, 100);
 
   } catch(err) {
-    mostrarError('No se pudo acceder al micrófono. Comprueba los permisos del navegador.');
+    mostrarError('No se pudo acceder al micrófono. Comprueba los permisos.');
   }
 }
 
@@ -344,6 +328,9 @@ function detenerGrabacion() {
   setEstado('procesando');
 }
 
+// ═══════════════════════════════════════════════
+// COMUNICACIÓN CON NETLIFY / ACRCLOUD
+// ═══════════════════════════════════════════════
 async function procesarAudio() {
   const blob = new Blob(audioChunks, { type: audioChunks[0]?.type || 'audio/webm' });
   const arrayBuffer = await blob.arrayBuffer();
@@ -362,106 +349,219 @@ async function procesarAudio() {
       body: JSON.stringify({ audioBase64: base64Audio })
     });
     
+    if (!res.ok) throw new Error('Error de servidor o sin conexión');
+
     const data = await res.json();
-    mostrarResultado(data);
+    mostrarResultado(data, blob);
   } catch(err) {
-    mostrarError('Error de conexión con el servidor. Inténtalo de nuevo.');
+    // 🔴 FALLO DE RED / OFFLINE
+    audioBlobTemporal = blob;
+    mostrarOpcionGuardar('📡 Sin conexión a Internet', 'Sin conexión (Pendiente)');
   }
 }
 
-function mostrarResultado(data) {
+function mostrarResultado(data, blob) {
   setEstado('listo');
   resetTimer();
   const wrap = document.getElementById('resultado-wrap');
   wrap.style.display = 'block';
 
+  // 1. ÉXITO (La reconoce)
   if (data.status?.code === 0 && data.metadata?.music?.length > 0) {
     const m = data.metadata.music[0];
     const nombre = m.title || 'Desconocido';
     const artista = m.artists?.map(a=>a.name).join(', ') || m.album?.name || '';
-    const score = m.score || '';
+    
+    // Obtenemos GPS y guardamos directamente (porque fue un éxito)
+    ejecutarGuardadoUbicacion(nombre, false, null);
 
-    // Guardamos en la libreta
-    guardarEnHistorial(nombre);
-
-    // Enlaces de YouTube y WhatsApp
-    const textoBusqueda = nombre + " marcha semana santa";
-    const urlYoutube = "https://www.youtube.com/results?search_query=" + encodeURIComponent(textoBusqueda);
-    const textoWhatsApp = "🎺 Acabo de escuchar la marcha *" + nombre + "* en la calle. ¡Cazada con mi Shazam Cofrade! 📱";
-    const urlWhatsApp = "https://api.whatsapp.com/send?text=" + encodeURIComponent(textoWhatsApp);
+    const urlYoutube = "https://www.youtube.com/results?search_query=" + encodeURIComponent(nombre + " marcha semana santa");
+    const urlWhatsApp = "https://api.whatsapp.com/send?text=" + encodeURIComponent("🎺 Acabo de escuchar la marcha *" + nombre + "* en la calle. ¡Cazada con mi Shazam Cofrade! 📍");
 
     wrap.innerHTML = `
       <div class="resultado-card">
         <div class="resultado-titulo">${nombre}</div>
         <div class="resultado-meta">${artista}</div>
-        ${score ? `<div class="resultado-score">CONFIANZA: ${score}%</div>` : ''}
-        
         <div class="botones-accion">
-            <a href="${urlYoutube}" target="_blank" class="btn-accion btn-yt">▶️ VER EN YOUTUBE</a>
+            <a href="${urlYoutube}" target="_blank" class="btn-accion btn-yt">▶️ YOUTUBE</a>
             <a href="${urlWhatsApp}" target="_blank" class="btn-accion btn-wa">💬 COMPARTIR</a>
         </div>
       </div>
       <button class="btn-otra" onclick="resetIdentificar()">🎙️ ESCUCHAR OTRA MARCHA</button>
     `;
-  } else if (data.status?.code === 1001) {
-    wrap.innerHTML = `
-      <div class="resultado-error">
-        <strong>Marcha no reconocida.</strong><br/><br/>
-        Acércate un poco más a la banda, asegúrate de no tapar el micrófono e inténtalo cuando suene la melodía principal.
-      </div>
-      <button class="btn-otra" onclick="resetIdentificar()">🎙️ INTENTAR DE NUEVO</button>
-    `;
-  } else {
-    mostrarError(`Error en el servidor (${data.status?.msg || 'desconocido'}).`);
+  } 
+  // 2. ERROR 1001 (No la reconoce, ofrecemos guardarla)
+  else if (data.status?.code === 1001) {
+    audioBlobTemporal = blob;
+    mostrarOpcionGuardar('🤷🏻‍♂️ Marcha no reconocida', 'Desconocida (Grabación)');
+  } 
+  // 3. LÍMITE ALCANZADO O ERROR INTERNO
+  else {
+    mostrarError(`⚠️ <strong>Error del servidor:</strong> ${data.status?.msg}`);
   }
 }
 
-function mostrarError(msg) {
+// ═══════════════════════════════════════════════
+// INTERFAZ DE GUARDADO OPCIONAL (Modo Offline)
+// ═══════════════════════════════════════════════
+function mostrarOpcionGuardar(tituloError, tituloTemporal) {
   setEstado('listo');
   resetTimer();
   const wrap = document.getElementById('resultado-wrap');
   wrap.style.display = 'block';
+
+  const urlTemporal = URL.createObjectURL(audioBlobTemporal);
+
   wrap.innerHTML = `
-    <div class="resultado-error">${msg}</div>
-    <button class="btn-otra" onclick="resetIdentificar()">🎙️ INTENTAR DE NUEVO</button>
+    <div class="resultado-error" style="border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.05); text-align: left;">
+      <strong style="color: var(--oro); font-size: 18px;">${tituloError}</strong><br/><br/>
+      No hemos podido identificarla ahora mismo. Escucha tu grabación: si se oye bien, guárdala en tu libreta para no perderla y ponerle nombre después.<br>
+      
+      <div style="margin: 15px 0;">
+        <audio controls src="${urlTemporal}" style="width: 100%; height: 35px; outline: none;"></audio>
+      </div>
+
+      <div class="botones-accion" style="margin-top: 20px;">
+          <button id="btn-ejecutar-guardado" onclick="ejecutarGuardado('${tituloTemporal}')" class="btn-accion" style="background-color: var(--oro); color: #000;">💾 GUARDAR</button>
+          <button onclick="descartarAudio()" class="btn-accion" style="background-color: transparent; border: 1px solid rgba(201,168,76,0.4); color: var(--oro);">🗑️ DESCARTAR</button>
+      </div>
+    </div>
   `;
+}
+
+function descartarAudio() {
+    audioBlobTemporal = null;
+    resetIdentificar();
+}
+
+function ejecutarGuardado(tituloTemporal) {
+    if(audioBlobTemporal) {
+        // Mostramos que está cargando para que el usuario no toque nada
+        const btn = document.getElementById('btn-ejecutar-guardado');
+        if(btn) { 
+            btn.innerHTML = '<span class="spinner"></span> OBTENIENDO GPS...'; 
+            btn.disabled = true; 
+        }
+
+        guardarAudioPendienteConUbicacion(audioBlobTemporal, tituloTemporal).then(() => {
+            audioBlobTemporal = null;
+            const wrap = document.getElementById('resultado-wrap');
+            wrap.innerHTML = `
+              <div class="resultado-card" style="text-align: center;">
+                <div style="font-size: 32px; margin-bottom: 10px;">✅</div>
+                <div class="resultado-titulo" style="font-size: 18px;">¡Grabación guardada!</div>
+                <div class="resultado-meta" style="margin-bottom: 0;">Ve a tu Historial cuando quieras para escucharla o ponerle nombre.</div>
+              </div>
+              <button class="btn-otra" onclick="resetIdentificar()">🎙️ ESCUCHAR OTRA MARCHA</button>
+            `;
+        });
+    }
+}
+
+async function guardarAudioPendienteConUbicacion(blob, tituloTemporal) {
+    const audioId = 'audio_' + Date.now();
+    try {
+        await localforage.setItem(audioId, blob); // Guardamos el sonido
+        await ejecutarGuardadoUbicacion(tituloTemporal, true, audioId); // Pedimos GPS y guardamos texto
+    } catch (err) {
+        console.error("Error al guardar:", err);
+    }
+}
+
+// ═══════════════════════════════════════════════
+// MAGIA DEL GPS (GEOLOCALIZACIÓN) Y BASE DE DATOS
+// ═══════════════════════════════════════════════
+function ejecutarGuardadoUbicacion(nombreMarcha, isPendiente, audioId) {
+    return new Promise((resolve) => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    let textoUbicacion = "Coordenadas guardadas";
+                    let urlMapa = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                    
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                        const data = await res.json();
+                        const calle = data.address.road || data.address.pedestrian || "";
+                        const ciudad = data.address.city || data.address.town || data.address.village || "";
+                        if (calle && ciudad) textoUbicacion = `${calle}, ${ciudad}`;
+                        else if (calle) textoUbicacion = calle;
+                    } catch (e) { }
+
+                    finalizarGuardadoLibreta(nombreMarcha, isPendiente, audioId, textoUbicacion, urlMapa);
+                    resolve();
+                },
+                (error) => {
+                    // Si el usuario deniega el permiso
+                    finalizarGuardadoLibreta(nombreMarcha, isPendiente, audioId, "Sin ubicación", "");
+                    resolve();
+                },
+                { timeout: 5000 } // Máximo 5 segundos esperando el satélite
+            );
+        } else {
+            finalizarGuardadoLibreta(nombreMarcha, isPendiente, audioId, "GPS no soportado", "");
+            resolve();
+        }
+    });
+}
+
+function finalizarGuardadoLibreta(nombreMarcha, isPendiente, audioId, ubicacion, mapa) {
+    let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
+    const fechaBonita = new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+    // Evitar duplicados inmediatos si no es pendiente
+    if(historial.length > 0 && historial[0].nombre === nombreMarcha && !isPendiente) return;
+
+    historial.unshift({
+        nombre: nombreMarcha,
+        fecha: fechaBonita,
+        favorito: false,
+        pendiente: isPendiente,
+        audioId: audioId,
+        ubicacion: ubicacion,
+        mapa: mapa
+    });
+    localStorage.setItem('misMarchas', JSON.stringify(historial));
+    mostrarHistorial();
+    mostrarFavoritos();
+}
+
+// ═══════════════════════════════════════════════
+// UI HELPERS (Estado, Tabs, Errores)
+// ═══════════════════════════════════════════════
+function mostrarError(msg) {
+  setEstado('listo'); resetTimer();
+  const wrap = document.getElementById('resultado-wrap'); wrap.style.display = 'block';
+  wrap.innerHTML = `<div class="resultado-error">${msg}</div><button class="btn-otra" onclick="resetIdentificar()">🎙️ VOLVER A INTENTAR</button>`;
 }
 
 function resetIdentificar() {
   document.getElementById('resultado-wrap').style.display = 'none';
   document.getElementById('resultado-wrap').innerHTML = '';
-  setEstado('listo');
-  resetTimer();
+  setEstado('listo'); resetTimer();
 }
 
 function resetTimer() {
-  const bar = document.getElementById('timer-bar');
-  const fill = document.getElementById('timer-fill');
-  bar.classList.remove('visible');
-  fill.style.width = '0%';
+  document.getElementById('timer-bar').classList.remove('visible');
+  document.getElementById('timer-fill').style.width = '0%';
 }
 
 function setEstado(s) {
-  const btn   = document.getElementById('mic-btn');
+  const btn = document.getElementById('mic-btn');
   const label = document.getElementById('mic-estado');
   const rings = document.getElementById('mic-rings');
-  btn.className = 'mic-btn';
-  label.className = 'mic-estado';
-  rings.className = 'mic-rings';
+  btn.className = 'mic-btn'; label.className = 'mic-estado'; rings.className = 'mic-rings';
 
   if (s === 'grabando') {
-    btn.classList.add('grabando');
-    btn.textContent = '⏹';
-    label.textContent = 'GRABANDO... (toca para parar)';
-    label.classList.add('grabando-txt');
-    rings.classList.add('pulsing');
+    btn.classList.add('grabando'); btn.textContent = '⏹';
+    label.textContent = 'GRABANDO... (toca para parar)'; label.classList.add('grabando-txt'); rings.classList.add('pulsing');
   } else if (s === 'procesando') {
-    btn.classList.add('procesando');
-    btn.textContent = '🔍';
-    label.innerHTML = '<span class="spinner"></span>IDENTIFICANDO...';
+    btn.classList.add('procesando'); btn.textContent = '🔍';
+    label.innerHTML = '<span class="spinner"></span>ANALIZANDO...';
   } else {
-    btn.textContent = '🎙️';
-    label.textContent = 'TOCA PARA ESCUCHAR';
+    btn.textContent = '🎙️'; label.textContent = 'TOCA PARA ESCUCHAR';
   }
 }
 
@@ -470,141 +570,142 @@ function getSupportedMimeType() {
   return types.find(t => MediaRecorder.isTypeSupported(t)) || '';
 }
 
-// ═══════════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════════
 function cambiarTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   btn.classList.add('active');
-  
   if (id === 'historial') mostrarHistorial();
   if (id === 'favoritos') mostrarFavoritos();
 }
 
 // ═══════════════════════════════════════════════
-// HISTORIAL Y FAVORITOS
+// HISTORIAL, FAVORITOS Y REPRODUCCIÓN
 // ═══════════════════════════════════════════════
-function guardarEnHistorial(nombreMarcha) {
-  let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
-  
-  const ahora = new Date();
-  const fechaBonita = ahora.toLocaleDateString() + ' - ' + ahora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
-  if(historial.length > 0 && historial[0].nombre === nombreMarcha) return;
-
-  const nuevaMarcha = {
-    nombre: nombreMarcha,
-    fecha: fechaBonita,
-    favorito: false
-  };
-
-  historial.unshift(nuevaMarcha);
-  localStorage.setItem('misMarchas', JSON.stringify(historial));
-  mostrarHistorial();
-  mostrarFavoritos();
+async function reproducirAudio(audioId) {
+    try {
+        const blob = await localforage.getItem(audioId);
+        if (blob) {
+            if(reproductorActual) reproductorActual.pause(); 
+            const url = URL.createObjectURL(blob);
+            reproductorActual = new Audio(url);
+            reproductorActual.play();
+            alert("▶️ Reproduciendo tu grabación...");
+        } else {
+            alert("No se encontró el archivo de grabación.");
+        }
+    } catch (err) { console.error(err); }
 }
 
-// Dibuja el panel de Historial (Todas las marchas)
+function nombrarMarcha(index) {
+    let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
+    const nuevoNombre = prompt("¿Qué marcha es? (Escribe el título para guardar tu descubrimiento):");
+    
+    if (nuevoNombre && nuevoNombre.trim() !== "") {
+        historial[index].nombre = nuevoNombre.trim();
+        historial[index].pendiente = false; 
+        localStorage.setItem('misMarchas', JSON.stringify(historial));
+        mostrarHistorial(); mostrarFavoritos();
+    }
+}
+
+function construirItemHistorial(marcha, index) {
+    const corazon = marcha.favorito ? '❤️' : '🤍';
+    const claseFav = marcha.favorito ? 'fav' : '';
+    const clasePendiente = marcha.pendiente ? 'pendiente' : '';
+    
+    // Icono y enlace de ubicación
+    let pinUbicacion = '';
+    if (marcha.ubicacion && marcha.ubicacion !== "Sin ubicación" && marcha.ubicacion !== "GPS no soportado") {
+        pinUbicacion = `<div class="historial-ubi">📍 <a href="${marcha.mapa}" target="_blank" style="color: inherit; text-decoration: none;">${marcha.ubicacion}</a></div>`;
+    }
+
+    let botonesHTML = '';
+    if (marcha.pendiente && marcha.audioId) {
+        botonesHTML = `
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <button onclick="reproducirAudio('${marcha.audioId}')" class="btn-min btn-play">▶️ ESCUCHAR</button>
+                <button onclick="nombrarMarcha(${index})" class="btn-min btn-nombrar">✏️ NOMBRAR</button>
+            </div>
+        `;
+    } else {
+        let textoAcompartir = `🎺 Acabo de escuchar *${marcha.nombre}*`;
+        if(marcha.ubicacion && marcha.ubicacion !== "Sin ubicación") textoAcompartir += ` en ${marcha.ubicacion}`;
+        textoAcompartir += `. ¡Cazada con mi Shazam Cofrade!`;
+
+        const urlYt = "https://www.youtube.com/results?search_query=" + encodeURIComponent(marcha.nombre + " marcha semana santa");
+        const urlWa = "https://api.whatsapp.com/send?text=" + encodeURIComponent(textoAcompartir);
+        botonesHTML = `
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <a href="${urlYt}" target="_blank" class="btn-min btn-yt">▶️ YouTube</a>
+                <a href="${urlWa}" target="_blank" class="btn-min btn-wa">💬 Compartir</a>
+            </div>
+        `;
+    }
+
+    return `
+      <div class="historial-item">
+        <span class="btn-corazon ${claseFav}" onclick="marcarFavorito(${index})">${corazon}</span>
+        <div style="flex:1;">
+          <div class="historial-n ${clasePendiente}">${marcha.nombre}</div>
+          <div class="historial-f">${marcha.fecha}</div>
+          ${pinUbicacion}
+          ${botonesHTML}
+        </div>
+      </div>
+    `;
+}
+
 function mostrarHistorial() {
   const lista = document.getElementById('lista-historial');
   if (!lista) return;
 
   let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
-  lista.innerHTML = ''; 
-
   if (historial.length === 0) {
     lista.innerHTML = '<p style="text-align:center;padding:40px;color:rgba(232,213,176,0.25);font-style:italic">Aún no has cazado ninguna marcha.</p>';
     return;
   }
 
-  let html = '';
-  historial.forEach((marcha, index) => {
-    const corazon = marcha.favorito ? '❤️' : '🤍';
-    const claseFav = marcha.favorito ? 'fav' : '';
-    
-    // Enlaces para cada item
-    const urlYoutube = "https://www.youtube.com/results?search_query=" + encodeURIComponent(marcha.nombre + " marcha semana santa");
-    const urlWhatsApp = "https://api.whatsapp.com/send?text=" + encodeURIComponent("🎺 Acabo de escuchar *" + marcha.nombre + "*. ¡Cazada con mi Shazam Cofrade! 📱");
-
-    html += `
-      <div class="historial-item">
-        <span class="btn-corazon ${claseFav}" onclick="marcarFavorito(${index})">${corazon}</span>
-        <div style="flex:1;">
-          <div class="historial-n">${marcha.nombre}</div>
-          <div class="historial-f">${marcha.fecha}</div>
-          <div style="display: flex; gap: 8px; margin-top: 12px;">
-             <a href="${urlYoutube}" target="_blank" class="btn-min btn-yt">▶️ YouTube</a>
-             <a href="${urlWhatsApp}" target="_blank" class="btn-min btn-wa">💬 Compartir</a>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-  
-  html += `<button class="btn-borrar-historial" onclick="borrarHistorial()">🗑️ VACIAR LIBRETA</button>`;
+  let html = historial.map((marcha, index) => construirItemHistorial(marcha, index)).join('');
+  html += `<button class="btn-borrar-historial" onclick="borrarHistorial()">🗑️ VACIAR LIBRETA Y AUDIOS</button>`;
   lista.innerHTML = html;
 }
 
-// Dibuja SOLO las marchas favoritas en su pestaña
 function mostrarFavoritos() {
   const lista = document.getElementById('lista-favoritos');
   if (!lista) return;
 
   let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
-  let html = '';
-  let hayFavoritos = false;
+  let html = ''; let hayFavs = false;
 
   historial.forEach((marcha, index) => {
     if(marcha.favorito) {
-        hayFavoritos = true;
-        const urlYoutube = "https://www.youtube.com/results?search_query=" + encodeURIComponent(marcha.nombre + " marcha semana santa");
-        const urlWhatsApp = "https://api.whatsapp.com/send?text=" + encodeURIComponent("🎺 Acabo de escuchar *" + marcha.nombre + "*. ¡Cazada con mi Shazam Cofrade! 📱");
-
-        html += `
-          <div class="historial-item">
-            <span class="btn-corazon fav" onclick="marcarFavorito(${index})">❤️</span>
-            <div style="flex:1;">
-              <div class="historial-n">${marcha.nombre}</div>
-              <div class="historial-f">${marcha.fecha}</div>
-              <div style="display: flex; gap: 8px; margin-top: 12px;">
-                 <a href="${urlYoutube}" target="_blank" class="btn-min btn-yt">▶️ YouTube</a>
-                 <a href="${urlWhatsApp}" target="_blank" class="btn-min btn-wa">💬 Compartir</a>
-              </div>
-            </div>
-          </div>
-        `;
+        hayFavs = true;
+        html += construirItemHistorial(marcha, index);
     }
   });
 
-  if (!hayFavoritos) {
-    lista.innerHTML = '<p style="text-align:center;padding:40px;color:rgba(232,213,176,0.25);font-style:italic">Aún no tienes marchas favoritas.<br><br>Ve a tu Historial y pulsa en el corazón 🤍 para guardarlas aquí.</p>';
-  } else {
-    lista.innerHTML = html;
-  }
+  if (!hayFavs) lista.innerHTML = '<p style="text-align:center;padding:40px;color:rgba(232,213,176,0.25);font-style:italic">Aún no tienes favoritos.</p>';
+  else lista.innerHTML = html;
 }
 
-// Cambiar el estado del corazón
 function marcarFavorito(index) {
   let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
   historial[index].favorito = !historial[index].favorito; 
   localStorage.setItem('misMarchas', JSON.stringify(historial));
-  
-  // Actualizamos ambas listas a la vez para que se reflejen los cambios al instante
-  mostrarHistorial(); 
-  mostrarFavoritos();
+  mostrarHistorial(); mostrarFavoritos();
 }
 
 function borrarHistorial() {
-  if(confirm('¿Seguro que quieres borrar TODAS tus marchas? (También se borrarán los favoritos)')) {
+  if(confirm('¿Seguro que quieres vaciar tu libreta? Esto también borrará todas las grabaciones guardadas.')) {
     localStorage.removeItem('misMarchas');
+    localforage.clear(); 
     mostrarHistorial();
     mostrarFavoritos();
   }
 }
 
-// INIT
+// INICIALIZACIÓN
 mostrarHistorial();
 mostrarFavoritos();
 </script>
