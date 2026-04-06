@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cofradam – Identifica la música de tu Semana Santa</title>
+  <title>Cofradam – Mapa y Sonidos de Semana Santa</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root {
@@ -26,6 +29,7 @@
       color: var(--crema);
       font-family: 'Crimson Text', Georgia, serif;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     /* ── HERO ── */
@@ -52,171 +56,80 @@
       justify-content: center;
       border-bottom: 1px solid rgba(201,168,76,0.12);
       overflow-x: auto;
+      background: #0d090b;
+      position: sticky; top: 0; z-index: 1000;
     }
     nav button {
-      padding: 17px 20px;
+      padding: 17px 15px;
       background: none; border: none;
       border-bottom: 2px solid transparent;
       color: rgba(232,213,176,0.35);
       font-family: 'Cinzel', serif;
-      font-size: 11px; letter-spacing: 2.5px;
+      font-size: 10px; letter-spacing: 1.5px;
       cursor: pointer; transition: all 0.25s;
       white-space: nowrap;
     }
     nav button.active { color: var(--oro); border-bottom-color: var(--oro); }
-    nav button:hover { color: rgba(201,168,76,0.7); }
 
     /* ── CONTENIDO ── */
-    main { max-width: 780px; margin: 0 auto; padding: 36px 20px 60px; }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    main { max-width: 780px; margin: 0 auto; padding: 20px 20px 60px; }
+    .tab-panel { display: none; min-height: 400px; }
+    .tab-panel.active { display: block; animation: aparecer 0.4s ease; }
 
-    /* ── IDENTIFICAR ── */
-    .escuchar-section { text-align: center; padding: 20px 0 32px; }
-
-    .mic-wrap { position: relative; display: inline-block; }
-    .mic-rings {
-      position: absolute; inset: -18px;
-      border-radius: 50%;
-      border: 1px solid rgba(201,168,76,0.2);
-      animation: ring-idle 3s ease-in-out infinite;
-    }
-    @keyframes ring-idle {
-      0%,100% { transform: scale(1); opacity: 0.4; }
-      50% { transform: scale(1.08); opacity: 0.1; }
-    }
-    .mic-rings.pulsing {
-      border-color: rgba(180,40,40,0.5);
-      animation: ring-pulse 1s ease-out infinite;
-    }
-    @keyframes ring-pulse {
-      0% { transform: scale(1); opacity: 0.8; }
-      100% { transform: scale(1.6); opacity: 0; }
+    /* ── MAPA ── */
+    #mapa-container {
+      width: 100%;
+      height: 70vh;
+      border-radius: 8px;
+      border: 1px solid var(--oro-border);
+      background: #111;
+      z-index: 10;
     }
 
+    /* ── BOTÓN MICRÓFONO ── */
+    .escuchar-section { text-align: center; padding: 40px 0; }
     .mic-btn {
-      width: 110px; height: 110px;
-      border-radius: 50%;
-      border: 2px solid rgba(201,168,76,0.35);
-      background: rgba(201,168,76,0.04);
-      color: var(--oro);
-      font-size: 42px;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: inline-flex;
-      align-items: center; justify-content: center;
-      position: relative; z-index: 1;
+      width: 110px; height: 110px; border-radius: 50%;
+      border: 2px solid rgba(201,168,76,0.35); background: rgba(201,168,76,0.04);
+      color: var(--oro); font-size: 42px; cursor: pointer; transition: all 0.3s;
+      display: inline-flex; align-items: center; justify-content: center; position: relative;
     }
-    .mic-btn:hover { border-color: var(--oro); background: rgba(201,168,76,0.1); transform: scale(1.04); }
-    .mic-btn.grabando { border-color: #c0392b; background: rgba(192,57,43,0.12); color: #e74c3c; }
-    .mic-btn.procesando { border-color: var(--oro); animation: spin-border 1.5s linear infinite; }
-    @keyframes spin-border {
-      to { box-shadow: 0 0 0 3px rgba(201,168,76,0.1), 0 0 20px rgba(201,168,76,0.2); }
-    }
+    .mic-btn.grabando { border-color: #c0392b; color: #e74c3c; box-shadow: 0 0 20px rgba(192,57,43,0.3); }
 
-    .mic-estado {
-      display: block; margin-top: 14px;
-      font-family: 'Cinzel', serif; font-size: 11px;
-      letter-spacing: 3px; color: rgba(232,213,176,0.35);
-    }
-    .mic-estado.grabando-txt { color: rgba(220,100,100,0.8); }
+    .mic-estado { display: block; margin-top: 15px; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px; color: rgba(232,213,176,0.4); }
 
-    .timer-bar {
-      width: 120px; height: 2px;
-      background: rgba(201,168,76,0.1);
-      margin: 12px auto 0;
-      border-radius: 2px;
-      overflow: hidden;
-      display: none;
-    }
-    .timer-bar.visible { display: block; }
-    .timer-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--oro), rgba(201,168,76,0.4));
-      width: 0%;
-      transition: width 0.1s linear;
-    }
-    .timer-fill.grabando-fill { background: linear-gradient(90deg, #e74c3c, rgba(220,100,80,0.4)); }
-
-    .resultado-wrap { margin-top: 28px; animation: aparecer 0.5s ease; }
-    @keyframes aparecer { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
-
-    .resultado-card {
-      background: rgba(201,168,76,0.04); border: 1px solid rgba(201,168,76,0.2);
-      border-radius: 5px; padding: 26px;
-    }
-    .resultado-titulo { font-family: 'Cinzel', serif; font-size: 22px; color: var(--oro); margin-bottom: 6px; }
-    .resultado-meta { font-size: 15px; color: rgba(232,213,176,0.45); margin-bottom: 14px; }
-    .resultado-score { margin-top: 14px; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px; color: rgba(201,168,76,0.4); }
-    .resultado-error {
-      background: rgba(139,26,26,0.15); border: 1px solid rgba(139,26,26,0.4);
-      border-radius: 5px; padding: 22px; color: rgba(232,180,150,0.8); font-size: 17px; line-height: 1.6;
-    }
-
-    .btn-otra {
-      margin-top: 16px; width: 100%; padding: 13px; background: none;
-      border: 1px solid rgba(201,168,76,0.2); color: rgba(201,168,76,0.5);
-      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px;
-      cursor: pointer; border-radius: 3px; transition: all 0.2s;
-    }
-    .btn-otra:hover { border-color: var(--oro); color: var(--oro); }
-
-    /* ── HISTORIAL Y FAVORITOS ── */
+    /* ── TARJETAS HISTORIAL ── */
     .historial-item {
-      border: 1px solid rgba(201,168,76,0.08); border-radius: 4px; padding: 20px;
-      margin-bottom: 10px; background: rgba(255,255,255,0.015);
-      display: flex; align-items: flex-start; transition: all 0.2s;
+      background: rgba(201,168,76,0.03); border: 1px solid rgba(201,168,76,0.1);
+      border-radius: 6px; padding: 18px; margin-bottom: 12px; display: flex;
     }
-    .historial-item:hover { border-color: rgba(201,168,76,0.25); background: rgba(201,168,76,0.03); }
-    .btn-corazon {
-      cursor: pointer; font-size: 24px; margin-right: 18px; margin-top: 2px;
-      color: rgba(232,213,176,0.3); transition: color 0.2s; user-select: none;
-    }
-    .btn-corazon.fav { color: var(--rojo); }
-    .historial-n { font-family: 'Cinzel', serif; font-size: 18px; color: var(--oro); margin-bottom: 4px; }
-    .historial-n.pendiente { color: #e74c3c; font-style: italic; }
-    .historial-f { font-size: 13px; color: rgba(232,213,176,0.4); font-family: 'Cinzel', serif; letter-spacing: 1px;}
-    .historial-ubi { font-size: 12px; color: rgba(201,168,76,0.7); margin-top: 6px; font-family: sans-serif; display: flex; align-items: center; gap: 4px;}
-    
-    .btn-borrar-historial {
-      margin-top: 20px; width: 100%; padding: 13px; background: rgba(139,26,26,0.1);
-      border: 1px solid rgba(139,26,26,0.4); color: rgba(232,150,150,0.8);
-      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px;
-      cursor: pointer; border-radius: 3px; transition: all 0.2s;
-    }
-    .btn-borrar-historial:hover { background: rgba(139,26,26,0.25); border-color: rgba(139,26,26,0.6); }
+    .btn-corazon { font-size: 20px; margin-right: 15px; cursor: pointer; opacity: 0.3; }
+    .btn-corazon.fav { opacity: 1; color: var(--rojo); }
+    .historial-n { font-family: 'Cinzel', serif; color: var(--oro); font-size: 18px; margin-bottom: 3px; }
+    .historial-f { font-size: 12px; opacity: 0.5; }
+    .historial-ubi { font-size: 12px; color: var(--oro); margin-top: 6px; text-decoration: none; display: block;}
 
     /* ── BOTONES ACCIÓN ── */
-    .botones-accion { display: flex; gap: 10px; margin-top: 15px; }
-    .btn-accion {
-      flex: 1; text-decoration: none; padding: 10px; border-radius: 5px; 
-      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px; 
-      text-align: center; font-weight: bold; transition: opacity 0.2s; cursor: pointer; border: none;
+    .botones-accion { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-min { 
+        padding: 8px 12px; border-radius: 4px; font-family: 'Cinzel', serif; font-size: 9px; 
+        font-weight: bold; border: none; cursor: pointer; text-decoration: none; text-align: center;
     }
-    .btn-accion:hover:not(:disabled) { opacity: 0.8; }
-    .btn-accion:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-yt { background-color: #cd201f; color: white; }
-    .btn-wa { background-color: #25D366; color: white; }
-    
-    .btn-play { background-color: rgba(201,168,76,0.2); color: var(--oro); border: 1px solid var(--oro); }
-    .btn-nombrar { background-color: var(--oro); color: #000; }
+    .btn-yt { background: #cd201f; color: white; }
+    .btn-wa { background: #25D366; color: white; }
+    .btn-play { background: rgba(201,168,76,0.2); color: var(--oro); border: 1px solid var(--oro); }
 
-    .btn-min {
-      text-decoration: none; padding: 6px 12px; border-radius: 4px;
-      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1px;
-      font-weight: bold; opacity: 0.85; transition: opacity 0.2s; cursor: pointer; border: none;
+    .resultado-error {
+      background: rgba(139,26,26,0.1); border: 1px solid rgba(139,26,26,0.3);
+      padding: 20px; border-radius: 6px; color: #f8d7da;
     }
-    .btn-min:hover { opacity: 1; }
 
-    footer {
-      text-align: center; padding: 20px; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px;
-      color: rgba(232,213,176,0.18); border-top: 1px solid rgba(201,168,76,0.08); margin-top: 40px;
-    }
     .spinner {
-      display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(201,168,76,0.2);
-      border-top-color: var(--oro); border-radius: 50%; animation: girar 0.8s linear infinite; margin-right: 8px; vertical-align: middle;
+      display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(201,168,76,0.2);
+      border-top-color: var(--oro); border-radius: 50%; animation: girar 0.8s linear infinite;
     }
     @keyframes girar { to{transform:rotate(360deg)} }
+    @keyframes aparecer { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
   </style>
 </head>
 <body>
@@ -224,490 +137,309 @@
 <header class="hero">
   <span class="cruz">✝</span>
   <h1>COFRADAM</h1>
-  <p class="subtitle">Identifica la música de tu Semana Santa en tiempo real</p>
+  <p class="subtitle">La libreta sonora del cofrade</p>
 </header>
 
 <nav>
-  <button class="active" onclick="cambiarTab('identificar', this)">🎺 IDENTIFICAR</button>
-  <button onclick="cambiarTab('historial', this)">📖 HISTORIAL</button>
-  <button onclick="cambiarTab('favoritos', this)">❤️ FAVORITOS</button>
+  <button class="active" onclick="cambiarTab('identificar', this)">🎙️ ESCUCHAR</button>
+  <button onclick="cambiarTab('historial', this)">📖 LIBRETA</button>
+  <button onclick="cambiarTab('mapa', this)">📍 EL MAPA</button>
+  <button onclick="cambiarTab('favoritos', this)">❤️ MIS JOYAS</button>
 </nav>
 
 <main>
   <div class="tab-panel active" id="tab-identificar">
     <div class="escuchar-section">
-      <div class="mic-wrap">
-        <div class="mic-rings" id="mic-rings"></div>
-        <button class="mic-btn" id="mic-btn" onclick="toggleGrabacion()">🎙️</button>
-      </div>
-      <span class="mic-estado" id="mic-estado">TOCA PARA ESCUCHAR</span>
-      <div class="timer-bar" id="timer-bar">
-        <div class="timer-fill" id="timer-fill"></div>
-      </div>
+      <button class="mic-btn" id="mic-btn" onclick="toggleGrabacion()">🎙️</button>
+      <span class="mic-estado" id="mic-estado">TOCA PARA IDENTIFICAR</span>
     </div>
     <div id="resultado-wrap" style="display:none"></div>
   </div>
 
   <div class="tab-panel" id="tab-historial">
-    <div style="text-align: center; margin-bottom: 24px;">
-      <h2 style="font-family: 'Cinzel', serif; font-size: 22px; color: var(--oro); letter-spacing: 2px;">Tu Libreta de Marchas</h2>
-      <p style="color: rgba(232,213,176,0.5); font-size: 16px; margin-top: 8px;">Las marchas que cazas y tus grabaciones se guardan aquí.</p>
-    </div>
     <div id="lista-historial"></div>
   </div>
 
-  <div class="tab-panel" id="tab-favoritos">
-    <div style="text-align: center; margin-bottom: 24px;">
-      <h2 style="font-family: 'Cinzel', serif; font-size: 22px; color: var(--oro); letter-spacing: 2px;">Tus Marchas Favoritas</h2>
+  <div class="tab-panel" id="tab-mapa">
+    <div style="text-align:center; margin-bottom:15px;">
+        <h2 style="font-family: 'Cinzel', serif; color: var(--oro);">Geolocalización Cofrade</h2>
+        <p style="font-size: 14px; opacity: 0.6;">Tus marchas cazadas situadas en el mapa</p>
     </div>
+    <div id="mapa-container"></div>
+  </div>
+
+  <div class="tab-panel" id="tab-favoritos">
     <div id="lista-favoritos"></div>
   </div>
 </main>
 
-<footer>SHAZAM COFRADE · TU MÚSICA DE SEMANA SANTA</footer>
-
 <script>
 // ═══════════════════════════════════════════════
-// VARIABLES GLOBALES Y CONFIGURACIÓN
+// VARIABLES Y CONFIG
 // ═══════════════════════════════════════════════
-let mediaRecorder = null;
-let audioChunks   = [];
-let grabando      = false;
-let timerInterval = null;
-const DURACION    = 12; // 12 segundos
-let audioBlobTemporal = null; // Guarda el audio temporal antes de decidir si borrarlo
-let reproductorActual = null;
+let mediaRecorder = null, audioChunks = [], grabando = false;
+let audioBlobTemporal = null, reproductorActual = null;
+let leafletMap = null, markersGroup = null;
 
-// Configurar base de datos profunda para audios
-localforage.config({ name: 'ShazamCofrade', storeName: 'audios_grabados' });
+localforage.config({ name: 'ShazamCofrade', storeName: 'audios' });
 
 // ═══════════════════════════════════════════════
-// GRABACIÓN DE AUDIO
+// GRABACIÓN Y RECONOCIMIENTO
 // ═══════════════════════════════════════════════
-function toggleGrabacion() {
-  if (grabando) detenerGrabacion();
-  else iniciarGrabacion();
+async function toggleGrabacion() {
+    if (grabando) return; // Ya estamos grabando o procesando
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => procesarAudio();
+        
+        mediaRecorder.start();
+        grabando = true;
+        setEstado('grabando');
+        
+        setTimeout(() => {
+            if(mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                stream.getTracks().forEach(t => t.stop());
+            }
+        }, 12000); // 12 segundos de muestra
+    } catch(err) {
+        alert("Error: Activa el permiso de micrófono.");
+    }
 }
 
-async function iniciarGrabacion() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    audioChunks  = [];
-    mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
-
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      stream.getTracks().forEach(t => t.stop());
-      procesarAudio();
-    };
-
-    mediaRecorder.start(100);
-    grabando = true;
-    setEstado('grabando');
-
-    let elapsed = 0;
-    const fill = document.getElementById('timer-fill');
-    document.getElementById('timer-bar').classList.add('visible');
-    fill.className = 'timer-fill grabando-fill';
-    timerInterval = setInterval(() => {
-      elapsed += 0.1;
-      fill.style.width = (elapsed / DURACION * 100) + '%';
-      if (elapsed >= DURACION) detenerGrabacion();
-    }, 100);
-
-  } catch(err) {
-    mostrarError('No se pudo acceder al micrófono. Comprueba los permisos.');
-  }
-}
-
-function detenerGrabacion() {
-  if (!grabando) return;
-  grabando = false;
-  clearInterval(timerInterval);
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-  setEstado('procesando');
-}
-
-// ═══════════════════════════════════════════════
-// COMUNICACIÓN CON NETLIFY / ACRCLOUD
-// ═══════════════════════════════════════════════
 async function procesarAudio() {
-  const blob = new Blob(audioChunks, { type: audioChunks[0]?.type || 'audio/webm' });
-  const arrayBuffer = await blob.arrayBuffer();
-  const bytes = new Uint8Array(arrayBuffer);
-
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i]);
-  }
-  const base64Audio = btoa(binary);
-
-  try {
-    const res = await fetch('/.netlify/functions/identificar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ audioBase64: base64Audio })
-    });
+    grabando = false;
+    setEstado('procesando');
     
-    if (!res.ok) throw new Error('Error de servidor o sin conexión');
-
-    const data = await res.json();
-    mostrarResultado(data, blob);
-  } catch(err) {
-    // 🔴 FALLO DE RED / OFFLINE
-    audioBlobTemporal = blob;
-    mostrarOpcionGuardar('📡 Sin conexión a Internet', 'Sin conexión (Pendiente)');
-  }
+    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = async () => {
+        const base64Audio = reader.result.split(',')[1];
+        try {
+            const res = await fetch('/.netlify/functions/identificar', {
+                method: 'POST',
+                body: JSON.stringify({ audioBase64: base64Audio })
+            });
+            const data = await res.json();
+            mostrarResultado(data, blob);
+        } catch(e) {
+            audioBlobTemporal = blob;
+            mostrarOpcionGuardar('📡 Sin conexión', 'Sin conexión (Pendiente)');
+        }
+    };
 }
 
 function mostrarResultado(data, blob) {
-  setEstado('listo');
-  resetTimer();
-  const wrap = document.getElementById('resultado-wrap');
-  wrap.style.display = 'block';
+    setEstado('listo');
+    const wrap = document.getElementById('resultado-wrap');
+    wrap.style.display = 'block';
 
-  // 1. ÉXITO (La reconoce)
-  if (data.status?.code === 0 && data.metadata?.music?.length > 0) {
-    const m = data.metadata.music[0];
-    const nombre = m.title || 'Desconocido';
-    const artista = m.artists?.map(a=>a.name).join(', ') || m.album?.name || '';
-    
-    // Obtenemos GPS y guardamos directamente (porque fue un éxito)
-    ejecutarGuardadoUbicacion(nombre, false, null);
-
-    const urlYoutube = "https://www.youtube.com/results?search_query=" + encodeURIComponent(nombre + " marcha semana santa");
-    const urlWhatsApp = "https://api.whatsapp.com/send?text=" + encodeURIComponent("🎺 Acabo de escuchar la marcha *" + nombre + "* en la calle. ¡Cazada con mi Shazam Cofrade! 📍");
-
-    wrap.innerHTML = `
-      <div class="resultado-card">
-        <div class="resultado-titulo">${nombre}</div>
-        <div class="resultado-meta">${artista}</div>
-        <div class="botones-accion">
-            <a href="${urlYoutube}" target="_blank" class="btn-accion btn-yt">▶️ YOUTUBE</a>
-            <a href="${urlWhatsApp}" target="_blank" class="btn-accion btn-wa">💬 COMPARTIR</a>
-        </div>
-      </div>
-      <button class="btn-otra" onclick="resetIdentificar()">🎙️ ESCUCHAR OTRA MARCHA</button>
-    `;
-  } 
-  // 2. ERROR 1001 (No la reconoce, ofrecemos guardarla)
-  else if (data.status?.code === 1001) {
-    audioBlobTemporal = blob;
-    mostrarOpcionGuardar('🤷🏻‍♂️ Marcha no reconocida', 'Desconocida (Grabación)');
-  } 
-  // 3. LÍMITE ALCANZADO O ERROR INTERNO
-  else {
-    mostrarError(`⚠️ <strong>Error del servidor:</strong> ${data.status?.msg}`);
-  }
-}
-
-// ═══════════════════════════════════════════════
-// INTERFAZ DE GUARDADO OPCIONAL (Modo Offline)
-// ═══════════════════════════════════════════════
-function mostrarOpcionGuardar(tituloError, tituloTemporal) {
-  setEstado('listo');
-  resetTimer();
-  const wrap = document.getElementById('resultado-wrap');
-  wrap.style.display = 'block';
-
-  const urlTemporal = URL.createObjectURL(audioBlobTemporal);
-
-  wrap.innerHTML = `
-    <div class="resultado-error" style="border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.05); text-align: left;">
-      <strong style="color: var(--oro); font-size: 18px;">${tituloError}</strong><br/><br/>
-      No hemos podido identificarla ahora mismo. Escucha tu grabación: si se oye bien, guárdala en tu libreta para no perderla y ponerle nombre después.<br>
-      
-      <div style="margin: 15px 0;">
-        <audio controls src="${urlTemporal}" style="width: 100%; height: 35px; outline: none;"></audio>
-      </div>
-
-      <div class="botones-accion" style="margin-top: 20px;">
-          <button id="btn-ejecutar-guardado" onclick="ejecutarGuardado('${tituloTemporal}')" class="btn-accion" style="background-color: var(--oro); color: #000;">💾 GUARDAR</button>
-          <button onclick="descartarAudio()" class="btn-accion" style="background-color: transparent; border: 1px solid rgba(201,168,76,0.4); color: var(--oro);">🗑️ DESCARTAR</button>
-      </div>
-    </div>
-  `;
-}
-
-function descartarAudio() {
-    audioBlobTemporal = null;
-    resetIdentificar();
-}
-
-function ejecutarGuardado(tituloTemporal) {
-    if(audioBlobTemporal) {
-        // Mostramos que está cargando para que el usuario no toque nada
-        const btn = document.getElementById('btn-ejecutar-guardado');
-        if(btn) { 
-            btn.innerHTML = '<span class="spinner"></span> OBTENIENDO GPS...'; 
-            btn.disabled = true; 
-        }
-
-        guardarAudioPendienteConUbicacion(audioBlobTemporal, tituloTemporal).then(() => {
-            audioBlobTemporal = null;
-            const wrap = document.getElementById('resultado-wrap');
-            wrap.innerHTML = `
-              <div class="resultado-card" style="text-align: center;">
-                <div style="font-size: 32px; margin-bottom: 10px;">✅</div>
-                <div class="resultado-titulo" style="font-size: 18px;">¡Grabación guardada!</div>
-                <div class="resultado-meta" style="margin-bottom: 0;">Ve a tu Historial cuando quieras para escucharla o ponerle nombre.</div>
-              </div>
-              <button class="btn-otra" onclick="resetIdentificar()">🎙️ ESCUCHAR OTRA MARCHA</button>
-            `;
-        });
-    }
-}
-
-async function guardarAudioPendienteConUbicacion(blob, tituloTemporal) {
-    const audioId = 'audio_' + Date.now();
-    try {
-        await localforage.setItem(audioId, blob); // Guardamos el sonido
-        await ejecutarGuardadoUbicacion(tituloTemporal, true, audioId); // Pedimos GPS y guardamos texto
-    } catch (err) {
-        console.error("Error al guardar:", err);
-    }
-}
-
-// ═══════════════════════════════════════════════
-// MAGIA DEL GPS (GEOLOCALIZACIÓN) Y BASE DE DATOS
-// ═══════════════════════════════════════════════
-function ejecutarGuardadoUbicacion(nombreMarcha, isPendiente, audioId) {
-    return new Promise((resolve) => {
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    let textoUbicacion = "Coordenadas guardadas";
-                    let urlMapa = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-                    
-                    try {
-                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-                        const data = await res.json();
-                        const calle = data.address.road || data.address.pedestrian || "";
-                        const ciudad = data.address.city || data.address.town || data.address.village || "";
-                        if (calle && ciudad) textoUbicacion = `${calle}, ${ciudad}`;
-                        else if (calle) textoUbicacion = calle;
-                    } catch (e) { }
-
-                    finalizarGuardadoLibreta(nombreMarcha, isPendiente, audioId, textoUbicacion, urlMapa);
-                    resolve();
-                },
-                (error) => {
-                    // Si el usuario deniega el permiso
-                    finalizarGuardadoLibreta(nombreMarcha, isPendiente, audioId, "Sin ubicación", "");
-                    resolve();
-                },
-                { timeout: 5000 } // Máximo 5 segundos esperando el satélite
-            );
-        } else {
-            finalizarGuardadoLibreta(nombreMarcha, isPendiente, audioId, "GPS no soportado", "");
-            resolve();
-        }
-    });
-}
-
-function finalizarGuardadoLibreta(nombreMarcha, isPendiente, audioId, ubicacion, mapa) {
-    let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
-    const fechaBonita = new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
-    // Evitar duplicados inmediatos si no es pendiente
-    if(historial.length > 0 && historial[0].nombre === nombreMarcha && !isPendiente) return;
-
-    historial.unshift({
-        nombre: nombreMarcha,
-        fecha: fechaBonita,
-        favorito: false,
-        pendiente: isPendiente,
-        audioId: audioId,
-        ubicacion: ubicacion,
-        mapa: mapa
-    });
-    localStorage.setItem('misMarchas', JSON.stringify(historial));
-    mostrarHistorial();
-    mostrarFavoritos();
-}
-
-// ═══════════════════════════════════════════════
-// UI HELPERS (Estado, Tabs, Errores)
-// ═══════════════════════════════════════════════
-function mostrarError(msg) {
-  setEstado('listo'); resetTimer();
-  const wrap = document.getElementById('resultado-wrap'); wrap.style.display = 'block';
-  wrap.innerHTML = `<div class="resultado-error">${msg}</div><button class="btn-otra" onclick="resetIdentificar()">🎙️ VOLVER A INTENTAR</button>`;
-}
-
-function resetIdentificar() {
-  document.getElementById('resultado-wrap').style.display = 'none';
-  document.getElementById('resultado-wrap').innerHTML = '';
-  setEstado('listo'); resetTimer();
-}
-
-function resetTimer() {
-  document.getElementById('timer-bar').classList.remove('visible');
-  document.getElementById('timer-fill').style.width = '0%';
-}
-
-function setEstado(s) {
-  const btn = document.getElementById('mic-btn');
-  const label = document.getElementById('mic-estado');
-  const rings = document.getElementById('mic-rings');
-  btn.className = 'mic-btn'; label.className = 'mic-estado'; rings.className = 'mic-rings';
-
-  if (s === 'grabando') {
-    btn.classList.add('grabando'); btn.textContent = '⏹';
-    label.textContent = 'GRABANDO... (toca para parar)'; label.classList.add('grabando-txt'); rings.classList.add('pulsing');
-  } else if (s === 'procesando') {
-    btn.classList.add('procesando'); btn.textContent = '🔍';
-    label.innerHTML = '<span class="spinner"></span>ANALIZANDO...';
-  } else {
-    btn.textContent = '🎙️'; label.textContent = 'TOCA PARA ESCUCHAR';
-  }
-}
-
-function getSupportedMimeType() {
-  const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/ogg','audio/mp4'];
-  return types.find(t => MediaRecorder.isTypeSupported(t)) || '';
-}
-
-function cambiarTab(id, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  btn.classList.add('active');
-  if (id === 'historial') mostrarHistorial();
-  if (id === 'favoritos') mostrarFavoritos();
-}
-
-// ═══════════════════════════════════════════════
-// HISTORIAL, FAVORITOS Y REPRODUCCIÓN
-// ═══════════════════════════════════════════════
-async function reproducirAudio(audioId) {
-    try {
-        const blob = await localforage.getItem(audioId);
-        if (blob) {
-            if(reproductorActual) reproductorActual.pause(); 
-            const url = URL.createObjectURL(blob);
-            reproductorActual = new Audio(url);
-            reproductorActual.play();
-            alert("▶️ Reproduciendo tu grabación...");
-        } else {
-            alert("No se encontró el archivo de grabación.");
-        }
-    } catch (err) { console.error(err); }
-}
-
-function nombrarMarcha(index) {
-    let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
-    const nuevoNombre = prompt("¿Qué marcha es? (Escribe el título para guardar tu descubrimiento):");
-    
-    if (nuevoNombre && nuevoNombre.trim() !== "") {
-        historial[index].nombre = nuevoNombre.trim();
-        historial[index].pendiente = false; 
-        localStorage.setItem('misMarchas', JSON.stringify(historial));
-        mostrarHistorial(); mostrarFavoritos();
-    }
-}
-
-function construirItemHistorial(marcha, index) {
-    const corazon = marcha.favorito ? '❤️' : '🤍';
-    const claseFav = marcha.favorito ? 'fav' : '';
-    const clasePendiente = marcha.pendiente ? 'pendiente' : '';
-    
-    // Icono y enlace de ubicación
-    let pinUbicacion = '';
-    if (marcha.ubicacion && marcha.ubicacion !== "Sin ubicación" && marcha.ubicacion !== "GPS no soportado") {
-        pinUbicacion = `<div class="historial-ubi">📍 <a href="${marcha.mapa}" target="_blank" style="color: inherit; text-decoration: none;">${marcha.ubicacion}</a></div>`;
-    }
-
-    let botonesHTML = '';
-    if (marcha.pendiente && marcha.audioId) {
-        botonesHTML = `
-            <div style="display: flex; gap: 8px; margin-top: 12px;">
-                <button onclick="reproducirAudio('${marcha.audioId}')" class="btn-min btn-play">▶️ ESCUCHAR</button>
-                <button onclick="nombrarMarcha(${index})" class="btn-min btn-nombrar">✏️ NOMBRAR</button>
+    if (data.status?.code === 0 && data.metadata?.music?.[0]) {
+        const m = data.metadata.music[0];
+        const nombre = m.title;
+        // ÉXITO: Guardamos con ubicación directamente
+        guardarConUbicacion(nombre, false, null);
+        wrap.innerHTML = `
+            <div class="resultado-card" style="padding:20px; border:1px solid var(--oro); background:rgba(201,168,76,0.05);">
+                <div class="resultado-titulo" style="font-family:'Cinzel'; color:var(--oro); font-size:22px;">${nombre}</div>
+                <div style="font-size:14px; opacity:0.7;">Identificada con éxito</div>
+                <button class="btn-otra" style="width:100%; margin-top:15px; padding:10px; background:var(--oro); border:none; font-family:'Cinzel';" onclick="location.reload()">🎙️ OTRA MARCHA</button>
             </div>
         `;
     } else {
-        let textoAcompartir = `🎺 Acabo de escuchar *${marcha.nombre}*`;
-        if(marcha.ubicacion && marcha.ubicacion !== "Sin ubicación") textoAcompartir += ` en ${marcha.ubicacion}`;
-        textoAcompartir += `. ¡Cazada con mi Shazam Cofrade!`;
-
-        const urlYt = "https://www.youtube.com/results?search_query=" + encodeURIComponent(marcha.nombre + " marcha semana santa");
-        const urlWa = "https://api.whatsapp.com/send?text=" + encodeURIComponent(textoAcompartir);
-        botonesHTML = `
-            <div style="display: flex; gap: 8px; margin-top: 12px;">
-                <a href="${urlYt}" target="_blank" class="btn-min btn-yt">▶️ YouTube</a>
-                <a href="${urlWa}" target="_blank" class="btn-min btn-wa">💬 Compartir</a>
-            </div>
-        `;
+        audioBlobTemporal = blob;
+        mostrarOpcionGuardar('🤷🏻‍♂️ No reconocida', 'Marcha Desconocida');
     }
+}
 
-    return `
-      <div class="historial-item">
-        <span class="btn-corazon ${claseFav}" onclick="marcarFavorito(${index})">${corazon}</span>
-        <div style="flex:1;">
-          <div class="historial-n ${clasePendiente}">${marcha.nombre}</div>
-          <div class="historial-f">${marcha.fecha}</div>
-          ${pinUbicacion}
-          ${botonesHTML}
+// ═══════════════════════════════════════════════
+// GUARDADO OPCIONAL Y GPS (ERRORES CORREGIDOS)
+// ═══════════════════════════════════════════════
+function mostrarOpcionGuardar(errorTxt, nombreTemp) {
+    const wrap = document.getElementById('resultado-wrap');
+    wrap.style.display = 'block';
+    const url = URL.createObjectURL(audioBlobTemporal);
+    wrap.innerHTML = `
+        <div class="resultado-error">
+            <strong>${errorTxt}</strong><br><small>¿Quieres guardar la grabación para intentarlo luego?</small>
+            <audio controls src="${url}" style="width:100%; margin:15px 0; height:30px;"></audio>
+            <div style="display:flex; gap:10px;">
+                <button onclick="confirmarGuardado('${nombreTemp}')" style="flex:1; padding:10px; background:var(--oro); border:none;">💾 GUARDAR</button>
+                <button onclick="location.reload()" style="flex:1; padding:10px; background:transparent; border:1px solid var(--oro); color:var(--oro);">🗑️ TIRAR</button>
+            </div>
         </div>
-      </div>
     `;
 }
 
-function mostrarHistorial() {
-  const lista = document.getElementById('lista-historial');
-  if (!lista) return;
-
-  let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
-  if (historial.length === 0) {
-    lista.innerHTML = '<p style="text-align:center;padding:40px;color:rgba(232,213,176,0.25);font-style:italic">Aún no has cazado ninguna marcha.</p>';
-    return;
-  }
-
-  let html = historial.map((marcha, index) => construirItemHistorial(marcha, index)).join('');
-  html += `<button class="btn-borrar-historial" onclick="borrarHistorial()">🗑️ VACIAR LIBRETA Y AUDIOS</button>`;
-  lista.innerHTML = html;
+async function confirmarGuardado(nombre) {
+    const audioId = 'aud_' + Date.now();
+    await localforage.setItem(audioId, audioBlobTemporal);
+    guardarConUbicacion(nombre, true, audioId);
+    location.reload();
 }
 
-function mostrarFavoritos() {
-  const lista = document.getElementById('lista-favoritos');
-  if (!lista) return;
-
-  let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
-  let html = ''; let hayFavs = false;
-
-  historial.forEach((marcha, index) => {
-    if(marcha.favorito) {
-        hayFavs = true;
-        html += construirItemHistorial(marcha, index);
+function guardarConUbicacion(nombre, pendiente, audioId) {
+    // Intentamos obtener GPS, pero si falla o no hay permiso, guardamos IGUAL (Corrección de error)
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                let calle = "Ubicación guardada";
+                try {
+                    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const d = await r.json();
+                    calle = d.address.road || d.address.pedestrian || "Calle desconocida";
+                } catch(e){}
+                finalizarEscritura(nombre, pendiente, audioId, latitude, longitude, calle);
+            },
+            () => finalizarEscritura(nombre, pendiente, audioId, null, null, "Sin GPS"),
+            { timeout: 5000 }
+        );
+    } else {
+        finalizarEscritura(nombre, pendiente, audioId, null, null, "Sin GPS");
     }
-  });
-
-  if (!hayFavs) lista.innerHTML = '<p style="text-align:center;padding:40px;color:rgba(232,213,176,0.25);font-style:italic">Aún no tienes favoritos.</p>';
-  else lista.innerHTML = html;
 }
 
-function marcarFavorito(index) {
-  let historial = JSON.parse(localStorage.getItem('misMarchas')) || [];
-  historial[index].favorito = !historial[index].favorito; 
-  localStorage.setItem('misMarchas', JSON.stringify(historial));
-  mostrarHistorial(); mostrarFavoritos();
+function finalizarEscritura(nombre, pendiente, audioId, lat, lon, calle) {
+    let list = JSON.parse(localStorage.getItem('misMarchas')) || [];
+    list.unshift({
+        nombre, audioId, pendiente, lat, lon, calle,
+        fecha: new Date().toLocaleString([], {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}),
+        fav: false
+    });
+    localStorage.setItem('misMarchas', JSON.stringify(list));
 }
 
-function borrarHistorial() {
-  if(confirm('¿Seguro que quieres vaciar tu libreta? Esto también borrará todas las grabaciones guardadas.')) {
-    localStorage.removeItem('misMarchas');
-    localforage.clear(); 
-    mostrarHistorial();
-    mostrarFavoritos();
-  }
+// ═══════════════════════════════════════════════
+// GESTIÓN DEL MAPA
+// ═══════════════════════════════════════════════
+function inicializarMapa() {
+    if (leafletMap) return; // Ya creado
+
+    // Crear mapa centrado en un punto por defecto (ej. Sevilla)
+    leafletMap = L.map('mapa-container').setView([37.3891, -5.9845], 13);
+    
+    // Capa de mapa oscuro (CartoDB Dark Matter) queda genial con el diseño cofrade
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(leafletMap);
+
+    markersGroup = L.layerGroup().addTo(leafletMap);
 }
 
-// INICIALIZACIÓN
-mostrarHistorial();
-mostrarFavoritos();
+function cargarPinesEnMapa() {
+    if (!markersGroup) return;
+    markersGroup.clearLayers();
+    
+    const marchas = JSON.parse(localStorage.getItem('misMarchas')) || [];
+    const pines = [];
+
+    marchas.forEach(m => {
+        if (m.lat && m.lon) {
+            const popupCont = `
+                <div style="color:#000; font-family:sans-serif;">
+                    <strong>${m.nombre}</strong><br>
+                    <small>${m.fecha}</small><br>
+                    <small>📍 ${m.calle}</small>
+                </div>
+            `;
+            const marker = L.marker([m.lat, m.lon]).bindPopup(popupCont);
+            markersGroup.addLayer(marker);
+            pines.push([m.lat, m.lon]);
+        }
+    });
+
+    if (pines.length > 0) {
+        leafletMap.fitBounds(pines, { padding: [50, 50] });
+    }
+}
+
+// ═══════════════════════════════════════════════
+// UI Y TABS
+// ═══════════════════════════════════════════════
+function cambiarTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+
+    if (id === 'mapa') {
+        inicializarMapa();
+        // Corrección de error de Leaflet: re-calcular tamaño al mostrar pestaña
+        setTimeout(() => {
+            leafletMap.invalidateSize();
+            cargarPinesEnMapa();
+        }, 200);
+    }
+    if (id === 'historial') renderLista('lista-historial', false);
+    if (id === 'favoritos') renderLista('lista-favoritos', true);
+}
+
+function renderLista(containerId, soloFavs) {
+    const box = document.getElementById(containerId);
+    let marchas = JSON.parse(localStorage.getItem('misMarchas')) || [];
+    if (soloFavs) marchas = marchas.filter(m => m.fav);
+
+    if (marchas.length === 0) {
+        box.innerHTML = '<p style="text-align:center; opacity:0.3; margin-top:50px;">No hay marchas aquí todavía.</p>';
+        return;
+    }
+
+    box.innerHTML = marchas.map((m, idx) => `
+        <div class="historial-item">
+            <div class="btn-corazon ${m.fav ? 'fav':''}" onclick="toggleFav(${idx})">❤️</div>
+            <div style="flex:1">
+                <div class="historial-n">${m.nombre}</div>
+                <div class="historial-f">${m.fecha} • 📍 ${m.calle}</div>
+                <div class="botones-accion">
+                    ${m.pendiente ? 
+                        `<button class="btn-min btn-play" onclick="reproducir('${m.audioId}')">▶️ ESCUCHAR</button>` :
+                        `<a href="https://www.youtube.com/results?search_query=${m.nombre}+marcha" target="_blank" class="btn-min btn-yt">YOUTUBE</a>`
+                    }
+                    <button class="btn-min" style="background:rgba(255,255,255,0.1); color:white;" onclick="borrarUna(${idx})">🗑️</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function reproducir(id) {
+    const blob = await localforage.getItem(id);
+    if (reproductorActual) reproductorActual.pause();
+    reproductorActual = new Audio(URL.createObjectURL(blob));
+    reproductorActual.play();
+}
+
+function toggleFav(idx) {
+    let list = JSON.parse(localStorage.getItem('misMarchas'));
+    list[idx].fav = !list[idx].fav;
+    localStorage.setItem('misMarchas', JSON.stringify(list));
+    renderLista('lista-historial', false); renderLista('lista-favoritos', true);
+}
+
+function borrarUna(idx) {
+    if(confirm("¿Borrar esta marcha?")) {
+        let list = JSON.parse(localStorage.getItem('misMarchas'));
+        list.splice(idx, 1);
+        localStorage.setItem('misMarchas', JSON.stringify(list));
+        renderLista('lista-historial', false);
+    }
+}
+
+function setEstado(s) {
+    const b = document.getElementById('mic-btn');
+    const l = document.getElementById('mic-estado');
+    if(s==='grabando'){ b.classList.add('grabando'); b.innerHTML='⏹'; l.innerText='ESCUCHANDO...'; }
+    else if(s==='procesando'){ b.innerHTML='<span class="spinner"></span>'; l.innerText='IDENTIFICANDO...'; }
+    else { b.classList.remove('grabando'); b.innerHTML='🎙️'; l.innerText='TOCA PARA IDENTIFICAR'; }
+}
+
+// Inicio
+renderLista('lista-historial', false);
 </script>
 </body>
 </html>
