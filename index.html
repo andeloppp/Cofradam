@@ -2,9 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Cofradam – Mapa y Sonidos de Semana Santa</title>
   
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0d090b" />
+  <link rel="apple-touch-icon" href="icono-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cofradam">
+
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
   
@@ -25,7 +32,8 @@
       --rojo: #8b1a1a;
       --morado: #3b1b36;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Añadido para evitar resaltado azul al tocar en móvil */
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
       /* Fondo cofrade con gradiente oscuro encima para no perder legibilidad */
@@ -82,7 +90,7 @@
     nav button.active { color: var(--oro); border-bottom-color: var(--oro); text-shadow: 0 0 10px rgba(201,168,76,0.3); }
 
     /* ── CONTENIDO ── */
-    main { max-width: 780px; margin: 0 auto; padding: 30px 20px 60px; flex: 1; width: 100%; }
+    main { max-width: 780px; margin: 0 auto; padding: 20px 20px 60px; flex: 1; width: 100%; }
     .tab-panel { display: none; min-height: 400px; }
     .tab-panel.active { display: block; animation: fade-in-up 0.5s ease forwards; }
 
@@ -105,8 +113,8 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
-    /* ── BOTÓN MICRÓFONO ── */
-    .escuchar-section { text-align: center; padding: 40px 0; }
+    /* ── BOTÓN MICRÓFONO Y VISUALIZADOR (Modificado) ── */
+    .escuchar-section { text-align: center; padding: 20px 0 40px; }
     .mic-btn {
       width: 120px; height: 120px; border-radius: 50%;
       border: 2px solid rgba(201,168,76,0.4); 
@@ -115,12 +123,24 @@
       display: inline-flex; align-items: center; justify-content: center; position: relative;
       animation: float 4s ease-in-out infinite; /* Animación de respiración */
       backdrop-filter: blur(4px);
+      z-index: 2; /* Para quedar sobre el visualizador */
     }
     .mic-btn:hover { transform: scale(1.05); border-color: var(--oro); }
     .mic-btn.grabando { 
       border-color: #c0392b; color: #e74c3c; 
       box-shadow: 0 0 30px rgba(192,57,43,0.4); animation: none; transform: scale(1.05); 
       background: rgba(192,57,43,0.1);
+    }
+
+    /* Estilos del Canvas del audio (Añadido) */
+    #visualizer {
+      display: none; /* Se muestra por JS al grabar */
+      width: 100%;
+      max-width: 300px;
+      height: 60px;
+      margin: 20px auto 0;
+      border-radius: 30px;
+      /* background: rgba(0,0,0,0.2); Opcional: fondo ligero */
     }
 
     .mic-estado { display: block; margin-top: 20px; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 3px; color: rgba(232,213,176,0.6); }
@@ -195,6 +215,7 @@
     <div class="escuchar-section">
       <button class="mic-btn" id="mic-btn" onclick="toggleGrabacion()"><i class="fa-solid fa-microphone"></i></button>
       <span class="mic-estado" id="mic-estado">TOCA PARA IDENTIFICAR</span>
+      <canvas id="visualizer" width="300" height="60"></canvas>
     </div>
     <div id="resultado-wrap" style="display:none; animation: fade-in-up 0.4s ease;"></div>
   </div>
@@ -223,11 +244,29 @@
 
 <script>
 // ═══════════════════════════════════════════════
+// REGISTRO DEL SERVICE WORKER (Añadido para PWA)
+// ═══════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      console.log('Service Worker registrado con éxito', reg);
+    }).catch(err => {
+      console.log('Fallo al registrar el Service Worker', err);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════
 // VARIABLES Y CONFIG
 // ═══════════════════════════════════════════════
 let mediaRecorder = null, audioChunks = [], grabando = false;
 let audioBlobTemporal = null, reproductorActual = null;
 let leafletMap = null, markersGroup = null;
+
+// Variables para la lógica del Visualizador (Añadido)
+let audioContext = null;
+let analyser = null;
+let animationId = null;
 
 localforage.config({ name: 'ShazamCofrade', storeName: 'audios' });
 
@@ -246,17 +285,91 @@ async function toggleGrabacion() {
         mediaRecorder.start();
         grabando = true;
         setEstado('grabando');
+        iniciarVisualizador(stream); // <- INICIAMOS EL DIBUJO DE ONDAS AQUI
         
         setTimeout(() => {
             if(mediaRecorder.state !== 'inactive') {
                 mediaRecorder.stop();
                 stream.getTracks().forEach(t => t.stop());
+                detenerVisualizador(); // <- PARAMOS EL DIBUJO AQUÍ
             }
         }, 12000); 
     } catch(err) {
         alert("Error: Activa el permiso de micrófono.");
     }
 }
+
+// ── LÓGICA DEL VISUALIZADOR DE ESPECTRO (Añadido) ──
+function iniciarVisualizador(stream) {
+    const canvas = document.getElementById('visualizer');
+    const canvasCtx = canvas.getContext('2d');
+    canvas.style.display = 'block'; // Mostramos el canvas
+
+    // Crear contexto de audio si no existe
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    
+    // Conectar la fuente (micrófono) al analizador
+    const source = audioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+
+    // Configuración del analizador
+    analyser.fftSize = 256; // Tamaño de la Transformada Rápida de Fourier
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    // Función que dibuja frame a frame
+    function draw() {
+        if (!grabando) return; // Parar si ya no grabamos
+        
+        animationId = requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray); // Obtener datos de frecuencia
+
+        // Limpiar el canvas
+        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Parámetros de dibujo
+        const barWidth = (canvas.width / bufferLength) * 2.5;
+        let barHeight;
+        let x = 0;
+
+        // Dibujar cada barra
+        for (let i = 0; i < bufferLength; i++) {
+            barHeight = dataArray[i] / 2.5; // Escalamos la altura
+            
+            // Color de las ondas: un degradado de oro a rojo según la altura
+            // r: va bajando de 201 (oro) a medida que sube la barra
+            // g: va bajando de 168 (oro) a medida que sube la barra
+            // b: fijo en 76 (oro)
+            // Esto hace que las barras altas sean más rojizas/oscuras
+            const r = 201 - (barHeight * 0.5);
+            const g = 168 - (barHeight * 1.5);
+            const b = 76;
+            canvasCtx.fillStyle = `rgb(${r},${g},${b})`;
+            
+            // Dibujar barra desde abajo hacia arriba
+            canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+            x += barWidth + 1; // Espacio entre barras
+        }
+    }
+
+    draw(); // Iniciar bucle de dibujo
+}
+
+function detenerVisualizador() {
+    // Parar la animación
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+    }
+    // Cerrar contexto de audio para liberar recursos
+    if (audioContext && audioContext.state !== 'closed') {
+        audioContext.close();
+    }
+    // Ocultar canvas
+    document.getElementById('visualizer').style.display = 'none';
+}
+// ───────────────────────────────────────────────────
 
 async function procesarAudio() {
     grabando = false;
